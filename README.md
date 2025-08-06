@@ -193,6 +193,13 @@ All commands are run from the root of the project, from a terminal:
 2. Fork 或克隆此仓库到你的 GitHub 账户
 3. 在 Netlify 中配置必要的环境变量
 
+### 部署指南
+
+- **完整部署指南**: [DEPLOY.md](./DEPLOY.md)
+- **快速部署**: [QUICK_DEPLOY.md](./QUICK_DEPLOY.md)
+- **手动部署**: [MANUAL_DEPLOY_GUIDE.md](./MANUAL_DEPLOY_GUIDE.md)
+- **部署检查清单**: [DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md)
+
 ## Developing Locally
 
 | Prerequisites                                                                |

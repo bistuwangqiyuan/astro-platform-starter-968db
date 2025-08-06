@@ -11,11 +11,7 @@ interface Props {
     showNavigation?: boolean;
 }
 
-const { 
-    title, 
-    description = '基于Astro和Supabase的现代数据分析平台',
-    showNavigation = true 
-} = Astro.props;
+const { title, description = '基于Astro和Supabase的现代数据分析平台', showNavigation = true } = Astro.props;
 ---
 
 <!doctype html>
@@ -26,68 +22,58 @@ const {
         <meta name="description" content={description} />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="generator" content={Astro.generator} />
-        
+
         <!-- Favicon -->
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-        
+
         <!-- Fonts -->
         <link rel="preload" as="font" type="font/woff2" href={interWoff2} crossorigin />
-        
+
         <!-- PWA Meta -->
         <meta name="theme-color" content="#355c7d" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        
+
         <!-- Open Graph -->
         <meta property="og:title" content={`${title} | 数据分析平台`} />
         <meta property="og:description" content={description} />
         <meta property="og:type" content="website" />
-        
+
         <!-- Twitter Card -->
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={`${title} | 数据分析平台`} />
         <meta name="twitter:description" content={description} />
     </head>
-    
+
     <body class="antialiased text-white bg-complementary">
         <!-- Skip to main content for accessibility -->
-        <a 
+        <a
             href="#main-content"
             class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 bg-primary text-primary-content px-4 py-2 rounded-md z-50"
         >
             跳转到主要内容
         </a>
-        
+
         <div class="flex flex-col min-h-screen bg-noise">
             <div class="flex flex-col w-full max-w-7xl mx-auto grow px-4 sm:px-6 lg:px-8">
                 <!-- Header -->
                 <Header showNavigation={showNavigation} />
-                
+
                 <!-- Main Content -->
                 <main id="main-content" class="grow py-6 sm:py-8" role="main">
                     <slot />
                 </main>
-                
+
                 <!-- Footer -->
                 <Footer />
             </div>
         </div>
-        
+
         <!-- Global Alert Container -->
-        <div 
-            id="global-alerts" 
-            class="fixed top-4 right-4 z-50 space-y-2 max-w-md"
-            aria-live="polite"
-            aria-atomic="true"
-        ></div>
-        
+        <div id="global-alerts" class="fixed top-4 right-4 z-50 space-y-2 max-w-md" aria-live="polite" aria-atomic="true"></div>
+
         <!-- Loading Overlay -->
-        <div 
-            id="loading-overlay" 
-            class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 hidden items-center justify-center"
-            role="status"
-            aria-label="加载中"
-        >
+        <div id="loading-overlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 hidden items-center justify-center" role="status" aria-label="加载中">
             <div class="bg-white rounded-lg p-6 shadow-xl max-w-sm mx-4">
                 <div class="flex items-center space-x-3">
                     <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
@@ -95,7 +81,7 @@ const {
                 </div>
             </div>
         </div>
-        
+
         <!-- Global Scripts -->
         <script>
             // 全局工具函数
@@ -109,7 +95,7 @@ const {
                         document.body.style.overflow = 'hidden';
                     }
                 },
-                
+
                 // 隐藏全局loading
                 hideLoading() {
                     const overlay = document.getElementById('loading-overlay');
@@ -119,7 +105,7 @@ const {
                         document.body.style.overflow = '';
                     }
                 },
-                
+
                 // 显示提醒消息
                 showAlert(message, type = 'info', options = {}) {
                     if (typeof window.AlertManager !== 'undefined') {
@@ -134,45 +120,45 @@ const {
                         });
                     }
                 },
-                
+
                 // API请求工具
                 async apiRequest(url, options = {}) {
                     const defaultOptions = {
                         headers: {
-                            'Content-Type': 'application/json',
-                        },
+                            'Content-Type': 'application/json'
+                        }
                     };
-                    
+
                     const config = { ...defaultOptions, ...options };
-                    
+
                     if (config.body && typeof config.body === 'object') {
                         config.body = JSON.stringify(config.body);
                     }
-                    
+
                     try {
                         const response = await fetch(url, config);
                         const data = await response.json();
-                        
+
                         if (!response.ok) {
                             throw new Error(data.error || `HTTP ${response.status}`);
                         }
-                        
+
                         return data;
                     } catch (error) {
                         console.error('API请求失败:', error);
                         throw error;
                     }
                 },
-                
+
                 // 格式化日期
                 formatDate(dateString, format = 'relative') {
                     const date = new Date(dateString);
                     const now = new Date();
-                    
+
                     if (format === 'relative') {
                         const diffMs = now.getTime() - date.getTime();
                         const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-                        
+
                         if (diffDays === 0) return '今天';
                         if (diffDays === 1) return '昨天';
                         if (diffDays < 7) return `${diffDays}天前`;
@@ -180,7 +166,7 @@ const {
                         if (diffDays < 365) return `${Math.floor(diffDays / 30)}个月前`;
                         return `${Math.floor(diffDays / 365)}年前`;
                     }
-                    
+
                     return date.toLocaleDateString('zh-CN', {
                         year: 'numeric',
                         month: 'long',
@@ -189,7 +175,7 @@ const {
                         minute: '2-digit'
                     });
                 },
-                
+
                 // 防抖函数
                 debounce(func, wait) {
                     let timeout;
@@ -202,7 +188,7 @@ const {
                         timeout = setTimeout(later, wait);
                     };
                 },
-                
+
                 // 复制到剪贴板
                 async copyToClipboard(text) {
                     try {
@@ -214,7 +200,7 @@ const {
                     }
                 }
             };
-            
+
             // 全局错误处理
             window.addEventListener('error', (event) => {
                 console.error('Global error:', event.error);
@@ -222,7 +208,7 @@ const {
                     window.Utils.showAlert('发生了意外错误，请刷新页面重试', 'error');
                 }
             });
-            
+
             // 未处理的Promise错误
             window.addEventListener('unhandledrejection', (event) => {
                 console.error('Unhandled promise rejection:', event.reason);
@@ -230,7 +216,7 @@ const {
                     window.Utils.showAlert('网络请求失败，请检查网络连接', 'error');
                 }
             });
-            
+
             // 页面可见性变化处理
             document.addEventListener('visibilitychange', () => {
                 if (document.hidden) {
@@ -241,7 +227,7 @@ const {
                     console.log('Page visible');
                 }
             });
-            
+
             // 键盘快捷键
             document.addEventListener('keydown', (event) => {
                 // Ctrl/Cmd + K 打开搜索
@@ -252,20 +238,20 @@ const {
                         searchInput.focus();
                     }
                 }
-                
+
                 // ESC 关闭模态框和提醒
                 if (event.key === 'Escape') {
                     // 关闭模态框
                     const modals = document.querySelectorAll('[data-modal][data-open="true"]');
-                    modals.forEach(modal => {
+                    modals.forEach((modal) => {
                         modal.setAttribute('data-open', 'false');
                     });
-                    
+
                     // 关闭可关闭的提醒
                     const dismissibleAlerts = document.querySelectorAll('[data-alert-type][data-dismissible="true"]');
                     if (dismissibleAlerts.length > 0 && window.AlertManager) {
                         const alertManager = new window.AlertManager();
-                        dismissibleAlerts.forEach(alert => {
+                        dismissibleAlerts.forEach((alert) => {
                             alertManager.dismissAlert(alert);
                         });
                     }

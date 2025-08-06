@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Astro Platform Starter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900">
+    <!-- Header -->
+    <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <h1 class="text-xl font-semibold text-gray-900 dark:text-white">
+                        Astro Platform Starter
+                    </h1>
+                </div>
+                <nav class="hidden md:flex space-x-8">
+                    <a href="/" class="text-primary-600 hover:text-primary-700">首页</a>
+                    <a href="/analyze" class="text-gray-500 hover:text-gray-700">数据分析</a>
+                    <a href="/favorites" class="text-gray-500 hover:text-gray-700">收藏</a>
+                    <a href="/history" class="text-gray-500 hover:text-gray-700">历史</a>
+                </nav>
+                <div class="flex items-center space-x-4">
+                    <button onclick="toggleTheme()" class="p-2 text-gray-500 hover:text-gray-700">
+                        🌙
+                    </button>
+                    <a href="/auth/login" class="bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700">
+                        登录
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <!-- Hero Section -->
+        <div class="text-center mb-16">
+            <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                现代化数据分析平台
+            </h1>
+            <p class="text-xl text-gray-600 dark:text-gray-300 mb-8">
+                基于 Astro.js、Tailwind CSS 和 Supabase 构建的高性能分析平台
+            </p>
+            <div class="flex justify-center space-x-4">
+                <a href="/auth/register" class="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors">
+                    开始使用
+                </a>
+                <a href="/analyze" class="border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 transition-colors">
+                    了解更多
+                </a>
+            </div>
+        </div>
+
+        <!-- Features Grid -->
+        <div class="grid md:grid-cols-3 gap-8 mb-16">
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                <div class="text-primary-600 text-3xl mb-4">⚡</div>
+                <h3 class="text-lg font-semibold mb-2">高性能</h3>
+                <p class="text-gray-600 dark:text-gray-300">
+                    基于 Astro.js 的静态站点生成，提供极速的加载体验
+                </p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                <div class="text-primary-600 text-3xl mb-4">🔒</div>
+                <h3 class="text-lg font-semibold mb-2">安全可靠</h3>
+                <p class="text-gray-600 dark:text-gray-300">
+                    集成 Supabase 认证和数据库，确保数据安全
+                </p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                <div class="text-primary-600 text-3xl mb-4">📊</div>
+                <h3 class="text-lg font-semibold mb-2">数据分析</h3>
+                <p class="text-gray-600 dark:text-gray-300">
+                    强大的数据分析和可视化功能，支持多种数据源
+                </p>
+            </div>
+        </div>
+
+        <!-- Status -->
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-8">
+            <div class="flex items-center">
+                <div class="text-yellow-600 mr-3">⚠️</div>
+                <div>
+                    <h4 class="text-yellow-800 font-medium">开发状态</h4>
+                    <p class="text-yellow-700">
+                        项目正在开发中。由于网络问题，这是一个简化的HTML版本。
+                        完整功能需要安装所有依赖后才能使用。
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-blue-900 mb-4">部署说明</h3>
+            <div class="space-y-2 text-blue-800">
+                <p>1. 网络恢复后，运行 <code class="bg-blue-100 px-2 py-1 rounded">npm install</code> 安装依赖</p>
+                <p>2. 配置环境变量：<code class="bg-blue-100 px-2 py-1 rounded">cp .env.example .env</code></p>
+                <p>3. 构建项目：<code class="bg-blue-100 px-2 py-1 rounded">npm run build</code></p>
+                <p>4. 部署到 Netlify 或其他平台</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="text-center text-gray-600 dark:text-gray-300">
+                <p>&copy; 2024 Astro Platform Starter. 基于 Astro.js + Supabase 构建。</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        }
+
+        // 初始化主题
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+</body>
+</html>
