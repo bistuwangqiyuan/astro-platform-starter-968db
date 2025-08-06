@@ -1,0 +1,138 @@
+[build]
+  # 构建命令
+  command = "npm run build"
+  # 构建输出目录
+  publish = "dist"
+  # 环境变量
+  environment = { NODE_VERSION = "18" }
+
+[build.processing]
+  # 跳过图片优化以加快构建速度
+  skip_processing = false
+
+[build.processing.css]
+  # CSS 处理设置
+  bundle = true
+  minify = true
+
+[build.processing.js]
+  # JavaScript 处理设置
+  bundle = true
+  minify = true
+
+[build.processing.html]
+  # HTML 处理设置
+  pretty_urls = true
+
+# 开发环境重写规则
+[dev]
+  command = "npm run dev"
+  port = 4321
+  publish = "dist"
+
+# Headers 设置
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # 安全标头
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    # HSTS
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+
+# API 路由特殊Headers
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Headers = "Content-Type, Authorization"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
+
+# 静态资源缓存
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# 重定向规则
+[[redirects]]
+  from = "/admin"
+  to = "/auth/login"
+  status = 302
+  condition = "Role=admin"
+
+[[redirects]]
+  from = "/dashboard"
+  to = "/analyze"
+  status = 301
+
+# 错误页面
+[[redirects]]
+  from = "/*"
+  to = "/404"
+  status = 404
+
+# Edge Functions
+[[edge_functions]]
+  function = "rewrite"
+  path = "/*"
+
+# 预渲染配置
+[template.environment]
+  # Supabase 配置
+  PUBLIC_SUPABASE_URL = "请设置您的Supabase项目URL"
+  PUBLIC_SUPABASE_ANON_KEY = "请设置您的Supabase匿名密钥"
+  
+  # 应用配置
+  APP_ENV = "production"
+  APP_DEBUG = "false"
+  
+  # 邮件配置
+  EMAIL_FROM = "noreply@yourdomain.com"
+  EMAIL_PROVIDER = "supabase"
+
+# 构建优化
+[build.environment]
+  # Node.js 版本
+  NODE_VERSION = "18"
+  # NPM 配置
+  NPM_FLAGS = "--production=false"
+  # 构建优化
+  ASTRO_TELEMETRY_DISABLED = "1"
+
+# 函数配置
+[functions]
+  # API 函数目录
+  directory = "netlify/functions"
+  # 超时设置 (秒)
+  timeout = 30
+  # 内存限制 (MB)
+  memory = 1024
+
+# 插件配置
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[[plugins]]
+  package = "netlify-plugin-submit-sitemap"
+  [plugins.inputs]
+    baseUrl = "https://your-domain.netlify.app"
+    sitemapPath = "/sitemap.xml"
+    providers = [
+      "google",
+      "bing"
+    ]

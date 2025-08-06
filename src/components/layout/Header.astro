@@ -1,0 +1,269 @@
+---
+import Logo from '../Logo.astro';
+import Button from '../ui/Button.astro';
+---
+
+<header class="sticky top-0 z-40 bg-gray-900/95 backdrop-blur-sm border-b border-gray-800">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+      <!-- Logo和站点名称 -->
+      <div class="flex items-center">
+        <a href="/" class="flex items-center space-x-3 text-white hover:text-primary transition-colors">
+          <Logo class="w-8 h-8" />
+          <span class="text-xl font-bold hidden sm:block">Astro Platform</span>
+        </a>
+      </div>
+
+      <!-- 主导航 - 桌面版 -->
+      <nav class="hidden md:flex items-center space-x-6">
+        <a 
+          href="/" 
+          class="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors"
+        >
+          首页
+        </a>
+        <a 
+          href="/analyze" 
+          class="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors"
+        >
+          数据分析
+        </a>
+        <a 
+          href="/features" 
+          class="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors"
+        >
+          功能特性
+        </a>
+        <a 
+          href="/docs" 
+          class="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors"
+        >
+          文档
+        </a>
+      </nav>
+
+      <!-- 用户操作区域 -->
+      <div class="flex items-center space-x-4">
+        <!-- 用户菜单 - 未登录状态 -->
+        <div id="unauthenticated-menu" class="flex items-center space-x-3">
+          <a href="/auth/login">
+            <Button variant="outline" size="sm">
+              登录
+            </Button>
+          </a>
+          <a href="/auth/register">
+            <Button variant="primary" size="sm">
+              注册
+            </Button>
+          </a>
+        </div>
+
+        <!-- 用户菜单 - 已登录状态 -->
+        <div id="authenticated-menu" class="hidden relative">
+          <button
+            id="user-menu-button"
+            class="flex items-center space-x-2 text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-gray-900 rounded-md px-2 py-1 transition-colors"
+            aria-expanded="false"
+            aria-haspopup="true"
+          >
+            <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+              <span id="user-avatar" class="text-sm font-medium text-primary-content"></span>
+            </div>
+            <span id="user-name" class="hidden sm:block text-sm font-medium"></span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+
+          <!-- 下拉菜单 -->
+          <div
+            id="user-menu-dropdown"
+            class="hidden absolute right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg py-1 border border-gray-700 z-50"
+            role="menu"
+            aria-orientation="vertical"
+          >
+            <a
+              href="/profile"
+              class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
+              role="menuitem"
+            >
+              个人资料
+            </a>
+            <a
+              href="/settings"
+              class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
+              role="menuitem"
+            >
+              设置
+            </a>
+            <a
+              href="/analyze"
+              class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
+              role="menuitem"
+            >
+              我的分析
+            </a>
+            <hr class="border-gray-700 my-1" />
+            <button
+              id="logout-button"
+              class="w-full text-left block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
+              role="menuitem"
+            >
+              退出登录
+            </button>
+          </div>
+        </div>
+
+        <!-- 移动端菜单按钮 -->
+        <button
+          id="mobile-menu-button"
+          class="md:hidden flex items-center justify-center p-2 text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-gray-900 rounded-md transition-colors"
+          aria-expanded="false"
+          aria-label="开启主菜单"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 移动端导航菜单 -->
+  <div id="mobile-menu" class="hidden md:hidden border-t border-gray-800 bg-gray-900">
+    <div class="px-2 pt-2 pb-3 space-y-1">
+      <a
+        href="/"
+        class="block px-3 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md text-base font-medium transition-colors"
+      >
+        首页
+      </a>
+      <a
+        href="/analyze"
+        class="block px-3 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md text-base font-medium transition-colors"
+      >
+        数据分析
+      </a>
+      <a
+        href="/features"
+        class="block px-3 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md text-base font-medium transition-colors"
+      >
+        功能特性
+      </a>
+      <a
+        href="/docs"
+        class="block px-3 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md text-base font-medium transition-colors"
+      >
+        文档
+      </a>
+    </div>
+  </div>
+</header>
+
+<script>
+  // Reason: 处理Header的交互功能，包括用户菜单和移动端导航
+  document.addEventListener('DOMContentLoaded', () => {
+    const unauthenticatedMenu = document.getElementById('unauthenticated-menu');
+    const authenticatedMenu = document.getElementById('authenticated-menu');
+    const userMenuButton = document.getElementById('user-menu-button');
+    const userMenuDropdown = document.getElementById('user-menu-dropdown');
+    const userAvatar = document.getElementById('user-avatar');
+    const userName = document.getElementById('user-name');
+    const logoutButton = document.getElementById('logout-button');
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    // 检查用户认证状态
+    async function checkAuthStatus() {
+      try {
+        console.log('检查用户认证状态');
+        const response = await fetch('/api/auth/me');
+        const result = await response.json();
+        
+        if (result.success && result.data.authenticated) {
+          console.log('用户已认证，显示用户菜单');
+          const user = result.data.user;
+          
+          // 显示已认证菜单
+          unauthenticatedMenu?.classList.add('hidden');
+          authenticatedMenu?.classList.remove('hidden');
+          
+          // 设置用户信息
+          if (userAvatar && userName) {
+            const initials = user.fullName 
+              ? user.fullName.split(' ').map((n: string) => n[0]).join('').toUpperCase()
+              : user.email[0].toUpperCase();
+            
+            userAvatar.textContent = initials;
+            userName.textContent = user.fullName || user.email;
+          }
+        } else {
+          console.log('用户未认证，显示登录菜单');
+          // 显示未认证菜单
+          unauthenticatedMenu?.classList.remove('hidden');
+          authenticatedMenu?.classList.add('hidden');
+        }
+      } catch (error) {
+        console.error('检查认证状态失败:', error);
+        // 出错时显示未认证菜单
+        unauthenticatedMenu?.classList.remove('hidden');
+        authenticatedMenu?.classList.add('hidden');
+      }
+    }
+
+    // 用户菜单下拉控制
+    userMenuButton?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isExpanded = userMenuButton.getAttribute('aria-expanded') === 'true';
+      
+      userMenuButton.setAttribute('aria-expanded', (!isExpanded).toString());
+      userMenuDropdown?.classList.toggle('hidden');
+    });
+
+    // 点击外部关闭用户菜单
+    document.addEventListener('click', (e) => {
+      if (!authenticatedMenu?.contains(e.target as Node)) {
+        userMenuButton?.setAttribute('aria-expanded', 'false');
+        userMenuDropdown?.classList.add('hidden');
+      }
+    });
+
+    // 登出处理
+    logoutButton?.addEventListener('click', async () => {
+      try {
+        console.log('处理用户登出');
+        const response = await fetch('/api/auth/logout', { method: 'POST' });
+        const result = await response.json();
+        
+        if (result.success) {
+          console.log('登出成功，刷新页面');
+          window.location.reload();
+        } else {
+          console.error('登出失败:', result.error);
+          alert('登出失败，请重试');
+        }
+      } catch (error) {
+        console.error('登出请求失败:', error);
+        alert('网络错误，请检查连接后重试');
+      }
+    });
+
+    // 移动端菜单控制
+    mobileMenuButton?.addEventListener('click', () => {
+      const isExpanded = mobileMenuButton.getAttribute('aria-expanded') === 'true';
+      
+      mobileMenuButton.setAttribute('aria-expanded', (!isExpanded).toString());
+      mobileMenu?.classList.toggle('hidden');
+    });
+
+    // 页面加载时检查认证状态
+    checkAuthStatus();
+
+    // 监听认证状态变化
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'auth-status-changed') {
+        checkAuthStatus();
+      }
+    });
+  });
+</script>

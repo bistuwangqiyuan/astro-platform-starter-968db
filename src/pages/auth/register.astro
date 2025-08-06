@@ -1,0 +1,278 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Alert from '../../components/Alert.astro';
+import Button from '../../components/ui/Button.astro';
+import Input from '../../components/ui/Input.astro';
+---
+
+<Layout title="用户注册">
+  <div class="max-w-md mx-auto mt-16">
+    <div class="bg-gray-800 p-8 rounded-lg shadow-lg">
+      <h1 class="text-2xl font-bold text-center mb-8">用户注册</h1>
+      
+      <div id="alert-container" class="mb-6"></div>
+      
+      <form id="register-form" class="space-y-6">
+        <div>
+          <label for="fullName" class="block text-sm font-medium mb-2">全名 (可选)</label>
+          <Input
+            type="text"
+            id="fullName"
+            name="fullName"
+            placeholder="请输入您的全名"
+          />
+        </div>
+        
+        <div>
+          <label for="email" class="block text-sm font-medium mb-2">邮箱地址 *</label>
+          <Input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="请输入邮箱地址"
+            required
+          />
+        </div>
+        
+        <div>
+          <label for="password" class="block text-sm font-medium mb-2">密码 *</label>
+          <Input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="至少8位，包含大小写字母、数字和特殊字符"
+            required
+          />
+          <div class="mt-2 text-sm text-gray-400">
+            密码要求：至少8位，包含大小写字母、数字和特殊字符
+          </div>
+        </div>
+        
+        <div>
+          <label for="confirmPassword" class="block text-sm font-medium mb-2">确认密码 *</label>
+          <Input
+            type="password"
+            id="confirmPassword"
+            name="confirmPassword"
+            placeholder="请再次输入密码"
+            required
+          />
+        </div>
+        
+        <div class="flex items-start">
+          <input
+            type="checkbox"
+            id="agreeTerms"
+            name="agreeTerms"
+            class="mt-1 mr-3 w-4 h-4 text-primary bg-gray-700 border-gray-600 rounded focus:ring-primary focus:ring-2"
+            required
+          />
+          <label for="agreeTerms" class="text-sm text-gray-400">
+            我已阅读并同意
+            <a href="/terms" class="text-primary hover:text-primary/80 underline">服务条款</a>
+            和
+            <a href="/privacy" class="text-primary hover:text-primary/80 underline">隐私政策</a>
+          </label>
+        </div>
+        
+        <Button
+          type="submit"
+          id="register-btn"
+          class="w-full"
+          size="lg"
+        >
+          <span id="register-text">注册</span>
+          <span id="register-loading" class="hidden">
+            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            注册中...
+          </span>
+        </Button>
+      </form>
+      
+      <div class="mt-6 text-center">
+        <p class="text-gray-400">
+          已有账户？
+          <a href="/auth/login" class="text-primary hover:text-primary/80 font-medium">立即登录</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  // Reason: 在客户端处理注册表单提交和验证，提供实时反馈
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('register-form') as HTMLFormElement;
+    const fullNameInput = document.getElementById('fullName') as HTMLInputElement;
+    const emailInput = document.getElementById('email') as HTMLInputElement;
+    const passwordInput = document.getElementById('password') as HTMLInputElement;
+    const confirmPasswordInput = document.getElementById('confirmPassword') as HTMLInputElement;
+    const agreeTermsInput = document.getElementById('agreeTerms') as HTMLInputElement;
+    const registerBtn = document.getElementById('register-btn') as HTMLButtonElement;
+    const registerText = document.getElementById('register-text') as HTMLSpanElement;
+    const registerLoading = document.getElementById('register-loading') as HTMLSpanElement;
+    const alertContainer = document.getElementById('alert-container') as HTMLDivElement;
+    
+    // 显示提示消息
+    function showAlert(message: string, type: 'success' | 'error' | 'info' = 'info') {
+      const alertClass = type === 'error' ? 'bg-red-600' : type === 'success' ? 'bg-green-600' : 'bg-blue-600';
+      alertContainer.innerHTML = `
+        <div class="${alertClass} text-white p-4 rounded-lg">
+          ${message}
+        </div>
+      `;
+      
+      // 自动隐藏（成功消息5秒，错误消息8秒）
+      const hideTimeout = type === 'error' ? 8000 : 5000;
+      setTimeout(() => {
+        alertContainer.innerHTML = '';
+      }, hideTimeout);
+    }
+    
+    // 设置加载状态
+    function setLoading(loading: boolean) {
+      registerBtn.disabled = loading;
+      registerText.classList.toggle('hidden', loading);
+      registerLoading.classList.toggle('hidden', !loading);
+    }
+    
+    // 密码强度验证
+    function validatePassword(password: string): { valid: boolean; message?: string } {
+      if (password.length < 8) {
+        return { valid: false, message: '密码长度至少为8位' };
+      }
+      
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/;
+      if (!passwordRegex.test(password)) {
+        return { valid: false, message: '密码必须包含大小写字母、数字和特殊字符' };
+      }
+      
+      return { valid: true };
+    }
+    
+    // 实时密码验证反馈
+    passwordInput.addEventListener('input', () => {
+      const password = passwordInput.value;
+      if (password.length > 0) {
+        const validation = validatePassword(password);
+        const passwordLabel = document.querySelector('label[for="password"]');
+        if (passwordLabel) {
+          if (validation.valid) {
+            passwordLabel.classList.remove('text-red-400');
+            passwordLabel.classList.add('text-green-400');
+          } else {
+            passwordLabel.classList.remove('text-green-400');
+            passwordLabel.classList.add('text-red-400');
+          }
+        }
+      }
+    });
+    
+    // 实时确认密码验证
+    confirmPasswordInput.addEventListener('input', () => {
+      const password = passwordInput.value;
+      const confirmPassword = confirmPasswordInput.value;
+      const confirmLabel = document.querySelector('label[for="confirmPassword"]');
+      
+      if (confirmPassword.length > 0) {
+        if (password === confirmPassword) {
+          confirmLabel?.classList.remove('text-red-400');
+          confirmLabel?.classList.add('text-green-400');
+        } else {
+          confirmLabel?.classList.remove('text-green-400');
+          confirmLabel?.classList.add('text-red-400');
+        }
+      }
+    });
+    
+    // 处理表单提交
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const fullName = fullNameInput.value.trim();
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+      const confirmPassword = confirmPasswordInput.value;
+      const agreeTerms = agreeTermsInput.checked;
+      
+      // 前端验证
+      if (!email || !password || !confirmPassword) {
+        showAlert('请填写所有必需字段', 'error');
+        return;
+      }
+      
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        showAlert('邮箱格式不正确', 'error');
+        return;
+      }
+      
+      const passwordValidation = validatePassword(password);
+      if (!passwordValidation.valid) {
+        showAlert(passwordValidation.message!, 'error');
+        return;
+      }
+      
+      if (password !== confirmPassword) {
+        showAlert('两次输入的密码不一致', 'error');
+        return;
+      }
+      
+      if (fullName && (fullName.length < 2 || fullName.length > 50)) {
+        showAlert('全名长度应在2-50字符之间', 'error');
+        return;
+      }
+      
+      if (!agreeTerms) {
+        showAlert('请阅读并同意服务条款和隐私政策', 'error');
+        return;
+      }
+      
+      try {
+        setLoading(true);
+        console.log('提交注册表单:', { email, fullName });
+        
+        const response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ 
+            email, 
+            password, 
+            fullName: fullName || undefined 
+          }),
+        });
+        
+        const result = await response.json();
+        console.log('注册API响应:', { success: result.success, status: response.status });
+        
+        if (result.success) {
+          if (result.data?.needsEmailConfirmation) {
+            showAlert('注册成功！请查看您的邮箱并点击确认链接以激活账户。', 'success');
+            // Reason: 邮箱确认后可能需要重新登录
+            setTimeout(() => {
+              window.location.href = '/auth/login?message=请确认邮箱后登录';
+            }, 3000);
+          } else {
+            showAlert('注册成功，正在跳转...', 'success');
+            setTimeout(() => {
+              window.location.href = '/';
+            }, 1000);
+          }
+        } else {
+          console.error('注册失败:', result.error);
+          showAlert(result.error || '注册失败，请重试', 'error');
+        }
+      } catch (error) {
+        console.error('注册请求发生错误:', error);
+        showAlert('网络错误，请检查网络连接后重试', 'error');
+      } finally {
+        setLoading(false);
+      }
+    });
+  });
+</script>
