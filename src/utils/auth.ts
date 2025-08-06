@@ -98,3 +98,123 @@ export const session = {
         }
     }
 };
+
+// 服务器端认证工具
+export const serverAuth = {
+    // 从请求中获取用户信息
+    async getUserFromRequest(request: Request) {
+        try {
+            // 从Authorization header获取token
+            const authorization = request.headers.get('authorization');
+            if (!authorization) {
+                return null;
+            }
+
+            const token = authorization.replace('Bearer ', '');
+            const { user } = await auth.getCurrentUser();
+            return user;
+        } catch (error) {
+            console.error('Server auth error:', error);
+            return null;
+        }
+    },
+
+    // 验证请求的认证状态
+    async validateRequest(request: Request): Promise<{ user: User | null; error?: string }> {
+        try {
+            const user = await this.getUserFromRequest(request);
+            return { user };
+        } catch (error) {
+            console.error('Validate request error:', error);
+            return { user: null, error: 'Authentication failed' };
+        }
+    }
+};
+
+// 认证服务类
+export const AuthService = {
+    // 用户登录
+    async login(credentials: { email: string; password: string }) {
+        try {
+            const { data, error } = await auth.signIn(credentials.email, credentials.password);
+            if (error) {
+                return { success: false, error: error.message };
+            }
+            return { success: true, user: data.user };
+        } catch (error) {
+            console.error('Login error:', error);
+            return { success: false, error: 'Login failed' };
+        }
+    },
+
+    // 用户注册
+    async register(userData: { email: string; password: string; name?: string }) {
+        try {
+            const { data, error } = await auth.signUp(userData.email, userData.password, userData.name ? { name: userData.name } : undefined);
+            if (error) {
+                return { success: false, error: error.message };
+            }
+            return { success: true, user: data.user };
+        } catch (error) {
+            console.error('Register error:', error);
+            return { success: false, error: 'Registration failed' };
+        }
+    },
+
+    // 用户登出
+    async logout() {
+        try {
+            const { error } = await auth.signOut();
+            if (error) {
+                return { success: false, error: error.message };
+            }
+            return { success: true };
+        } catch (error) {
+            console.error('Logout error:', error);
+            return { success: false, error: 'Logout failed' };
+        }
+    },
+
+    // 获取访问令牌
+    async getAccessToken() {
+        try {
+            // 需要从 supabase 客户端获取 session
+            const { supabase } = await import('./supabase');
+            const { data: { session } } = await supabase.auth.getSession();
+            return session?.access_token || null;
+        } catch (error) {
+            console.error('Get access token error:', error);
+            return null;
+        }
+    },
+
+    // 修改密码
+    async changePassword(newPassword: string) {
+        try {
+            const { data, error } = await auth.updatePassword(newPassword);
+            if (error) {
+                return { success: false, error: error.message };
+            }
+            return { success: true };
+        } catch (error) {
+            console.error('Change password error:', error);
+            return { success: false, error: 'Password change failed' };
+        }
+    },
+
+    // 重置密码
+    async resetPassword(email: string) {
+        try {
+            // 需要从 supabase 客户端调用重置密码
+            const { supabase } = await import('./supabase');
+            const { error } = await supabase.auth.resetPasswordForEmail(email);
+            if (error) {
+                return { success: false, error: error.message };
+            }
+            return { success: true };
+        } catch (error) {
+            console.error('Reset password error:', error);
+            return { success: false, error: 'Password reset failed' };
+        }
+    }
+};
