@@ -1,0 +1,257 @@
+---
+import Navigation from './Navigation.astro';
+import Logo from '../Logo.astro';
+
+// Reason: 获取当前路径用于导航高亮
+const currentPath = Astro.url.pathname;
+---
+
+<header class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
+  <div class="container">
+    <div class="flex items-center justify-between h-16">
+      <!-- Logo和品牌 -->
+      <div class="flex items-center">
+        <a href="/" class="flex items-center space-x-2 text-xl font-bold text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+          <Logo class="w-8 h-8" />
+          <span>Astro Platform</span>
+        </a>
+      </div>
+      
+      <!-- 桌面导航 -->
+      <div class="hidden md:block">
+        <Navigation currentPath={currentPath} />
+      </div>
+      
+      <!-- 右侧功能区 -->
+      <div class="flex items-center space-x-4">
+        <!-- 主题切换按钮 -->
+        <button
+          id="theme-toggle"
+          type="button"
+          class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          aria-label="切换主题"
+          title="切换深色/浅色模式"
+        >
+          <!-- 浅色模式图标 -->
+          <svg id="theme-toggle-light-icon" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path>
+          </svg>
+          <!-- 深色模式图标 -->
+          <svg id="theme-toggle-dark-icon" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+          </svg>
+        </button>
+        
+        <!-- 用户菜单 -->
+        <div class="relative">
+          <button
+            id="user-menu-button"
+            type="button"
+            class="flex items-center space-x-2 p-2 text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            aria-expanded="false"
+            aria-haspopup="true"
+          >
+            <!-- 用户头像占位符 -->
+            <div class="w-8 h-8 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center">
+              <svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+              </svg>
+            </div>
+            <span class="hidden sm:block text-gray-700 dark:text-gray-300">用户</span>
+            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          
+          <!-- 用户下拉菜单 -->
+          <div
+            id="user-menu"
+            class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50"
+            role="menu"
+            aria-orientation="vertical"
+            aria-labelledby="user-menu-button"
+          >
+            <a href="/profile" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700" role="menuitem">
+              <div class="flex items-center space-x-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+                <span>个人资料</span>
+              </div>
+            </a>
+            <a href="/favorites" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700" role="menuitem">
+              <div class="flex items-center space-x-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                </svg>
+                <span>我的收藏</span>
+              </div>
+            </a>
+            <a href="/history" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700" role="menuitem">
+              <div class="flex items-center space-x-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span>历史记录</span>
+              </div>
+            </a>
+            <div class="border-t border-gray-200 dark:border-gray-600 my-1"></div>
+            <button id="logout-btn" class="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700" role="menuitem">
+              <div class="flex items-center space-x-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                </svg>
+                <span>退出登录</span>
+              </div>
+            </button>
+          </div>
+        </div>
+        
+        <!-- 移动端菜单按钮 -->
+        <button
+          id="mobile-menu-button"
+          type="button"
+          class="md:hidden p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          aria-expanded="false"
+          aria-controls="mobile-menu"
+          aria-label="打开主菜单"
+        >
+          <!-- 汉堡包图标 -->
+          <svg id="mobile-menu-open" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+          <!-- 关闭图标 -->
+          <svg id="mobile-menu-close" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+    
+    <!-- 移动端导航菜单 -->
+    <div id="mobile-menu" class="md:hidden hidden border-t border-gray-200 dark:border-gray-700">
+      <div class="px-2 pt-2 pb-3 space-y-1">
+        <Navigation currentPath={currentPath} isMobile={true} />
+      </div>
+    </div>
+  </div>
+</header>
+
+<script>
+  // Reason: 主题切换功能
+  document.addEventListener('DOMContentLoaded', () => {
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light-icon');
+    const darkIcon = document.getElementById('theme-toggle-dark-icon');
+    
+    // 更新图标显示
+    function updateThemeIcons() {
+      const isDark = document.documentElement.classList.contains('dark');
+      lightIcon?.classList.toggle('hidden', !isDark);
+      darkIcon?.classList.toggle('hidden', isDark);
+    }
+    
+    // 初始化图标
+    updateThemeIcons();
+    
+    // 主题切换事件
+    themeToggleBtn?.addEventListener('click', () => {
+      if (typeof window.toggleTheme === 'function') {
+        window.toggleTheme();
+        updateThemeIcons();
+      }
+    });
+    
+    // Reason: 用户菜单切换功能
+    const userMenuButton = document.getElementById('user-menu-button');
+    const userMenu = document.getElementById('user-menu');
+    
+    userMenuButton?.addEventListener('click', () => {
+      const isExpanded = userMenuButton.getAttribute('aria-expanded') === 'true';
+      userMenuButton.setAttribute('aria-expanded', (!isExpanded).toString());
+      userMenu?.classList.toggle('hidden');
+    });
+    
+    // 点击外部关闭用户菜单
+    document.addEventListener('click', (event) => {
+      if (!userMenuButton?.contains(event.target as Node) && 
+          !userMenu?.contains(event.target as Node)) {
+        userMenuButton?.setAttribute('aria-expanded', 'false');
+        userMenu?.classList.add('hidden');
+      }
+    });
+    
+    // Reason: 移动端菜单切换功能
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const mobileMenuOpen = document.getElementById('mobile-menu-open');
+    const mobileMenuClose = document.getElementById('mobile-menu-close');
+    
+    mobileMenuButton?.addEventListener('click', () => {
+      const isExpanded = mobileMenuButton.getAttribute('aria-expanded') === 'true';
+      const newExpanded = !isExpanded;
+      
+      mobileMenuButton.setAttribute('aria-expanded', newExpanded.toString());
+      mobileMenu?.classList.toggle('hidden');
+      mobileMenuOpen?.classList.toggle('hidden', newExpanded);
+      mobileMenuClose?.classList.toggle('hidden', !newExpanded);
+    });
+    
+    // Reason: 登出功能
+    const logoutBtn = document.getElementById('logout-btn');
+    logoutBtn?.addEventListener('click', async () => {
+      try {
+        console.log('[Header] 开始登出流程');
+        
+        const response = await fetch('/api/auth/logout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          console.log('[Header] 登出成功，跳转到首页');
+          window.location.href = '/';
+        } else {
+          console.error('[Header] 登出失败');
+          alert('登出失败，请重试');
+        }
+      } catch (error) {
+        console.error('[Header] 登出过程出错:', error);
+        alert('登出失败，请重试');
+      }
+    });
+  });
+</script>
+
+<style>
+  /* Reason: 确保header在移动端有正确的触摸体验 */
+  @media (max-width: 768px) {
+    button {
+      min-height: 44px; /* 确保触摸目标足够大 */
+      min-width: 44px;
+    }
+  }
+  
+  /* Reason: 平滑的下拉动画 */
+  #user-menu {
+    transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+  }
+  
+  #user-menu.hidden {
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: none;
+  }
+  
+  /* Reason: 移动端菜单的滑入动画 */
+  #mobile-menu {
+    transition: all 0.3s ease-in-out;
+  }
+  
+  #mobile-menu.hidden {
+    max-height: 0;
+    overflow: hidden;
+  }
+</style>
