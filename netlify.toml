@@ -1,8 +1,8 @@
 # Netlify部署配置 - Astro Platform Starter
 [build]
-  command = "npm run build"
+  command = "echo 'Skip build, using existing dist'"
   functions = "netlify/functions"
-  publish = "dist"
+  publish = "emergency-dist"
 
 [build.environment]
   NODE_VERSION = "18"

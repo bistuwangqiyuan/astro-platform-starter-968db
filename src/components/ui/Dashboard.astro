@@ -1,0 +1,511 @@
+---
+// 统计仪表板组件
+import Chart from './Chart.astro';
+
+export interface Props {
+  className?: string;
+}
+
+const { className = '' } = Astro.props;
+---
+
+<div class={`dashboard ${className}`}>
+  <!-- 统计卡片 -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <!-- 总分析次数 -->
+    <div class="stats-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-600">总分析次数</p>
+          <p class="text-2xl font-bold text-gray-900" id="total-analyses">--</p>
+        </div>
+      </div>
+      <div class="mt-4">
+        <span class="text-sm text-green-600 font-medium" id="analyses-growth">--</span>
+        <span class="text-sm text-gray-500">比上月</span>
+      </div>
+    </div>
+
+    <!-- 收藏数量 -->
+    <div class="stats-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-accent-100 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-accent-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-600">收藏关键词</p>
+          <p class="text-2xl font-bold text-gray-900" id="total-favorites">--</p>
+        </div>
+      </div>
+      <div class="mt-4">
+        <span class="text-sm text-green-600 font-medium" id="favorites-growth">--</span>
+        <span class="text-sm text-gray-500">比上月</span>
+      </div>
+    </div>
+
+    <!-- API 使用量 -->
+    <div class="stats-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-warning-100 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-warning-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-600">API 使用量</p>
+          <p class="text-2xl font-bold text-gray-900">
+            <span id="api-used">--</span>/<span id="api-limit">--</span>
+          </p>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="w-full bg-gray-200 rounded-full h-2">
+          <div class="bg-warning-600 h-2 rounded-full" id="api-progress" style="width: 0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 成功率 -->
+    <div class="stats-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-success-100 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-success-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-600">分析成功率</p>
+          <p class="text-2xl font-bold text-gray-900" id="success-rate">--</p>
+        </div>
+      </div>
+      <div class="mt-4">
+        <span class="text-sm text-gray-500">最近30天</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 图表区域 -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+    <!-- 分析趋势图 -->
+    <Chart
+      type="line"
+      id="analyses-trend-chart"
+      title="分析趋势"
+      description="过去30天的关键词分析趋势"
+      data={{
+        labels: [],
+        datasets: [{
+          label: '分析次数',
+          data: [],
+          borderColor: 'rgb(59, 130, 246)',
+          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+          fill: true,
+          tension: 0.4
+        }]
+      }}
+      options={{
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              stepSize: 1
+            }
+          }
+        }
+      }}
+    />
+
+    <!-- 分析来源分布 -->
+    <Chart
+      type="doughnut"
+      id="source-distribution-chart"
+      title="数据源分布"
+      description="不同数据源的使用占比"
+      data={{
+        labels: ['Google', '百度', '其他'],
+        datasets: [{
+          data: [0, 0, 0],
+          backgroundColor: [
+            'rgb(59, 130, 246)',
+            'rgb(16, 185, 129)',
+            'rgb(245, 158, 11)'
+          ],
+          borderWidth: 2,
+          borderColor: '#fff'
+        }]
+      }}
+      options={{
+        cutout: '60%',
+        plugins: {
+          legend: {
+            position: 'bottom'
+          }
+        }
+      }}
+    />
+  </div>
+
+  <!-- 热门关键词 -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h3 class="text-lg font-semibold text-gray-900">热门关键词</h3>
+      <p class="text-sm text-gray-600">最近分析的热门关键词</p>
+    </div>
+    
+    <div class="p-6">
+      <!-- 加载状态 -->
+      <div id="hot-keywords-loading" class="text-center py-8">
+        <div class="inline-flex items-center justify-center w-8 h-8 bg-primary-100 rounded-full mb-2">
+          <svg class="animate-spin w-4 h-4 text-primary-600" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        </div>
+        <p class="text-gray-600 text-sm">正在加载热门关键词...</p>
+      </div>
+
+      <!-- 关键词列表 -->
+      <div id="hot-keywords-list" class="hidden">
+        <div class="space-y-4" id="keywords-container">
+          <!-- 关键词项将通过JavaScript填充 -->
+        </div>
+      </div>
+
+      <!-- 空状态 -->
+      <div id="hot-keywords-empty" class="hidden text-center py-8">
+        <div class="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full mb-2">
+          <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+          </svg>
+        </div>
+        <p class="text-gray-600 text-sm">暂无关键词数据</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .dashboard {
+    /* 仪表板样式 */
+  }
+
+  .stats-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  }
+
+  .stats-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+
+  /* 响应式调整 */
+  @media (max-width: 768px) {
+    .dashboard {
+      padding: 1rem;
+    }
+    
+    .stats-card {
+      padding: 1rem;
+    }
+  }
+</style>
+
+<script>
+  // 仪表板数据管理
+  document.addEventListener('DOMContentLoaded', () => {
+    window.logKeyStep('仪表板初始化开始');
+    initializeDashboard();
+  });
+
+  let dashboardData = {
+    stats: {},
+    trends: [],
+    sources: {},
+    keywords: []
+  };
+
+  async function initializeDashboard() {
+    try {
+      // 加载仪表板数据
+      await loadDashboardData();
+      
+      // 更新统计卡片
+      updateStatsCards();
+      
+      // 更新图表
+      updateCharts();
+      
+      // 更新热门关键词
+      updateHotKeywords();
+
+      window.logKeyStep('仪表板初始化完成');
+    } catch (error) {
+      console.error('[DASHBOARD] 仪表板初始化失败:', error);
+      window.logKeyStep('仪表板初始化失败', error);
+    }
+  }
+
+  async function loadDashboardData() {
+    try {
+      window.logKeyStep('开始加载仪表板数据');
+
+      const response = await fetch('/api/dashboard', {
+        method: 'GET'
+      });
+
+      const result = await response.json();
+
+      if (result.success && result.data) {
+        dashboardData = result.data;
+        window.logKeyStep('仪表板数据加载成功', {
+          statsCount: Object.keys(dashboardData.stats).length,
+          trendsCount: dashboardData.trends.length,
+          keywordsCount: dashboardData.keywords.length
+        });
+      } else {
+        throw new Error(result.error || '加载仪表板数据失败');
+      }
+    } catch (error) {
+      console.error('[DASHBOARD] 数据加载失败:', error);
+      window.logKeyStep('仪表板数据加载失败', error);
+      
+      // 使用空数据初始化
+      dashboardData = {
+        stats: {
+          totalAnalyses: 0,
+          totalFavorites: 0,
+          apiUsed: 0,
+          apiLimit: 100,
+          successRate: 0
+        },
+        trends: [],
+        sources: {},
+        keywords: []
+      };
+    }
+  }
+
+  function updateStatsCards() {
+    try {
+      const stats = dashboardData.stats;
+
+      // 更新总分析次数
+      const totalAnalysesEl = document.getElementById('total-analyses');
+      if (totalAnalysesEl) {
+        totalAnalysesEl.textContent = formatNumber(stats.totalAnalyses || 0);
+      }
+
+      // 更新收藏数量
+      const totalFavoritesEl = document.getElementById('total-favorites');
+      if (totalFavoritesEl) {
+        totalFavoritesEl.textContent = formatNumber(stats.totalFavorites || 0);
+      }
+
+      // 更新API使用量
+      const apiUsedEl = document.getElementById('api-used');
+      const apiLimitEl = document.getElementById('api-limit');
+      const apiProgressEl = document.getElementById('api-progress');
+      
+      if (apiUsedEl) apiUsedEl.textContent = formatNumber(stats.apiUsed || 0);
+      if (apiLimitEl) apiLimitEl.textContent = formatNumber(stats.apiLimit || 100);
+      
+      if (apiProgressEl) {
+        const percentage = ((stats.apiUsed || 0) / (stats.apiLimit || 100)) * 100;
+        apiProgressEl.style.width = `${Math.min(percentage, 100)}%`;
+      }
+
+      // 更新成功率
+      const successRateEl = document.getElementById('success-rate');
+      if (successRateEl) {
+        successRateEl.textContent = `${Math.round(stats.successRate || 0)}%`;
+      }
+
+      // 更新增长率（模拟数据，实际应该从API获取）
+      updateGrowthRates(stats);
+
+      window.logKeyStep('统计卡片更新完成');
+    } catch (error) {
+      console.error('[DASHBOARD] 统计卡片更新失败:', error);
+    }
+  }
+
+  function updateGrowthRates(stats) {
+    // 这里应该从API获取真实的增长数据
+    // 现在使用模拟数据
+    const analysesGrowthEl = document.getElementById('analyses-growth');
+    const favoritesGrowthEl = document.getElementById('favorites-growth');
+
+    if (analysesGrowthEl) {
+      const growth = Math.floor(Math.random() * 30) + 5; // 5-35%增长
+      analysesGrowthEl.textContent = `+${growth}%`;
+      analysesGrowthEl.className = 'text-sm text-green-600 font-medium';
+    }
+
+    if (favoritesGrowthEl) {
+      const growth = Math.floor(Math.random() * 20) + 2; // 2-22%增长
+      favoritesGrowthEl.textContent = `+${growth}%`;
+      favoritesGrowthEl.className = 'text-sm text-green-600 font-medium';
+    }
+  }
+
+  function updateCharts() {
+    try {
+      // 更新分析趋势图
+      updateTrendsChart();
+      
+      // 更新数据源分布图
+      updateSourcesChart();
+
+      window.logKeyStep('图表更新完成');
+    } catch (error) {
+      console.error('[DASHBOARD] 图表更新失败:', error);
+    }
+  }
+
+  function updateTrendsChart() {
+    const trends = dashboardData.trends;
+    
+    if (trends && trends.length > 0) {
+      const chartData = {
+        labels: trends.map(item => formatDate(item.date)),
+        datasets: [{
+          label: '分析次数',
+          data: trends.map(item => item.count),
+          borderColor: 'rgb(59, 130, 246)',
+          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+          fill: true,
+          tension: 0.4
+        }]
+      };
+
+      if (window.Chart && window.Chart.update) {
+        window.Chart.update('analyses-trend-chart', chartData);
+      }
+    }
+  }
+
+  function updateSourcesChart() {
+    const sources = dashboardData.sources;
+    
+    if (sources && Object.keys(sources).length > 0) {
+      const labels = Object.keys(sources);
+      const data = Object.values(sources);
+
+      const chartData = {
+        labels: labels,
+        datasets: [{
+          data: data,
+          backgroundColor: [
+            'rgb(59, 130, 246)',
+            'rgb(16, 185, 129)',
+            'rgb(245, 158, 11)',
+            'rgb(239, 68, 68)',
+            'rgb(139, 92, 246)'
+          ],
+          borderWidth: 2,
+          borderColor: '#fff'
+        }]
+      };
+
+      if (window.Chart && window.Chart.update) {
+        window.Chart.update('source-distribution-chart', chartData);
+      }
+    }
+  }
+
+  function updateHotKeywords() {
+    const keywords = dashboardData.keywords;
+    const loadingEl = document.getElementById('hot-keywords-loading');
+    const listEl = document.getElementById('hot-keywords-list');
+    const emptyEl = document.getElementById('hot-keywords-empty');
+    const containerEl = document.getElementById('keywords-container');
+
+    // 隐藏加载状态
+    if (loadingEl) loadingEl.classList.add('hidden');
+
+    if (!keywords || keywords.length === 0) {
+      // 显示空状态
+      if (emptyEl) emptyEl.classList.remove('hidden');
+      if (listEl) listEl.classList.add('hidden');
+      return;
+    }
+
+    // 显示关键词列表
+    if (listEl) listEl.classList.remove('hidden');
+    if (emptyEl) emptyEl.classList.add('hidden');
+
+    if (containerEl) {
+      containerEl.innerHTML = keywords.map((keyword, index) => `
+        <div class="flex items-center justify-between py-3 px-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+          <div class="flex items-center space-x-3">
+            <span class="text-sm font-medium text-gray-500 w-6">${index + 1}</span>
+            <div>
+              <p class="font-medium text-gray-900">${keyword.keyword}</p>
+              <p class="text-sm text-gray-600">${keyword.count} 次分析</p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button onclick="analyzeKeyword('${keyword.keyword}')" 
+                    class="text-primary-600 hover:text-primary-800 text-sm font-medium">
+              分析
+            </button>
+            <button onclick="favoriteKeyword('${keyword.keyword}')" 
+                    class="text-accent-600 hover:text-accent-800 text-sm font-medium">
+              收藏
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    window.logKeyStep('热门关键词更新完成', { count: keywords.length });
+  }
+
+  function formatNumber(num) {
+    if (num >= 1000000) {
+      return (num / 1000000).toFixed(1) + 'M';
+    } else if (num >= 1000) {
+      return (num / 1000).toFixed(1) + 'K';
+    }
+    return num.toString();
+  }
+
+  function formatDate(dateStr) {
+    const date = new Date(dateStr);
+    return `${date.getMonth() + 1}/${date.getDate()}`;
+  }
+
+  function analyzeKeyword(keyword) {
+    window.logKeyStep('从仪表板跳转到分析', { keyword });
+    window.location.href = `/analyze?keyword=${encodeURIComponent(keyword)}`;
+  }
+
+  function favoriteKeyword(keyword) {
+    window.logKeyStep('从仪表板添加收藏', { keyword });
+    // 这里可以直接调用收藏API或跳转到收藏页面
+    window.location.href = `/favorites?add=${encodeURIComponent(keyword)}`;
+  }
+
+  // 导出刷新函数
+  window.refreshDashboard = initializeDashboard;
+</script>

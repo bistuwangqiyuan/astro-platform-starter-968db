@@ -1,0 +1,367 @@
+---
+// 数据可视化图表组件
+export interface Props {
+  type: 'line' | 'bar' | 'pie' | 'doughnut' | 'area' | 'scatter';
+  data: any;
+  options?: any;
+  className?: string;
+  width?: number;
+  height?: number;
+  id?: string;
+  title?: string;
+  description?: string;
+}
+
+const {
+  type,
+  data,
+  options = {},
+  className = '',
+  width = 400,
+  height = 300,
+  id = `chart-${Math.random().toString(36).substr(2, 9)}`,
+  title,
+  description
+} = Astro.props;
+
+// 默认图表配置
+const defaultOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      position: 'top',
+    },
+    tooltip: {
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      titleColor: '#fff',
+      bodyColor: '#fff',
+      borderColor: '#374151',
+      borderWidth: 1,
+      cornerRadius: 8,
+      displayColors: false,
+    },
+  },
+  scales: type === 'pie' || type === 'doughnut' ? {} : {
+    x: {
+      grid: {
+        color: '#f3f4f6',
+      },
+      ticks: {
+        color: '#6b7280',
+      },
+    },
+    y: {
+      grid: {
+        color: '#f3f4f6',
+      },
+      ticks: {
+        color: '#6b7280',
+      },
+    },
+  },
+};
+
+// 合并配置
+const finalOptions = { ...defaultOptions, ...options };
+---
+
+<div class={`chart-container ${className}`}>
+  {title && (
+    <div class="mb-4">
+      <h3 class="text-lg font-semibold text-gray-900">{title}</h3>
+      {description && (
+        <p class="text-sm text-gray-600 mt-1">{description}</p>
+      )}
+    </div>
+  )}
+  
+  <div class="chart-wrapper bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+    <canvas 
+      id={id}
+      width={width}
+      height={height}
+      class="chart-canvas"
+      data-chart-type={type}
+      data-chart-data={JSON.stringify(data)}
+      data-chart-options={JSON.stringify(finalOptions)}
+    ></canvas>
+    
+    <!-- 加载状态 -->
+    <div class="chart-loading hidden">
+      <div class="flex items-center justify-center h-64">
+        <div class="text-center">
+          <div class="inline-flex items-center justify-center w-12 h-12 bg-primary-100 rounded-full mb-4">
+            <svg class="animate-spin w-6 h-6 text-primary-600" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+          <p class="text-gray-600">正在加载图表...</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 错误状态 -->
+    <div class="chart-error hidden">
+      <div class="flex items-center justify-center h-64">
+        <div class="text-center">
+          <div class="inline-flex items-center justify-center w-12 h-12 bg-error-100 rounded-full mb-4">
+            <svg class="w-6 h-6 text-error-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <p class="text-gray-600">图表加载失败</p>
+          <button onclick="retryChart('{id}')" class="mt-2 text-primary-600 hover:text-primary-800 text-sm">重试</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 空数据状态 -->
+    <div class="chart-empty hidden">
+      <div class="flex items-center justify-center h-64">
+        <div class="text-center">
+          <div class="inline-flex items-center justify-center w-12 h-12 bg-gray-100 rounded-full mb-4">
+            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+          </div>
+          <p class="text-gray-600">暂无数据</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .chart-container {
+    position: relative;
+  }
+  
+  .chart-wrapper {
+    position: relative;
+    min-height: 300px;
+  }
+  
+  .chart-canvas {
+    max-width: 100%;
+    height: auto !important;
+  }
+  
+  /* 响应式调整 */
+  @media (max-width: 640px) {
+    .chart-wrapper {
+      min-height: 250px;
+      padding: 1rem;
+    }
+  }
+</style>
+
+<script>
+  // Chart.js 图表初始化
+  document.addEventListener('DOMContentLoaded', () => {
+    initializeCharts();
+  });
+
+  let chartInstances = new Map();
+
+  async function initializeCharts() {
+    // 动态加载 Chart.js
+    if (!window.Chart) {
+      try {
+        await loadChartJS();
+      } catch (error) {
+        console.error('[CHART] Chart.js 加载失败:', error);
+        showChartError();
+        return;
+      }
+    }
+
+    // 初始化所有图表
+    const canvases = document.querySelectorAll('.chart-canvas');
+    canvases.forEach(canvas => {
+      const chartId = canvas.id;
+      if (!chartInstances.has(chartId)) {
+        createChart(canvas);
+      }
+    });
+  }
+
+  async function loadChartJS() {
+    return new Promise((resolve, reject) => {
+      // 检查是否已经加载
+      if (window.Chart) {
+        resolve(window.Chart);
+        return;
+      }
+
+      // 动态创建script标签
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js';
+      script.onload = () => {
+        window.logKeyStep('Chart.js 加载成功');
+        resolve(window.Chart);
+      };
+      script.onerror = () => {
+        reject(new Error('Chart.js 加载失败'));
+      };
+      document.head.appendChild(script);
+    });
+  }
+
+  function createChart(canvas) {
+    try {
+      const chartType = canvas.dataset.chartType;
+      const chartData = JSON.parse(canvas.dataset.chartData);
+      const chartOptions = JSON.parse(canvas.dataset.chartOptions);
+      const chartId = canvas.id;
+
+      window.logKeyStep('创建图表', { type: chartType, id: chartId });
+
+      // 检查数据是否为空
+      if (!chartData || !chartData.datasets || chartData.datasets.length === 0) {
+        showChartEmpty(chartId);
+        return;
+      }
+
+      // 显示加载状态
+      showChartLoading(chartId);
+
+      // 获取2D上下文
+      const ctx = canvas.getContext('2d');
+      
+      // 创建图表实例
+      const chart = new Chart(ctx, {
+        type: chartType,
+        data: chartData,
+        options: chartOptions
+      });
+
+      // 存储图表实例
+      chartInstances.set(chartId, chart);
+
+      // 隐藏加载状态
+      hideChartStates(chartId);
+      canvas.style.display = 'block';
+
+      window.logKeyStep('图表创建成功', { id: chartId });
+
+    } catch (error) {
+      console.error('[CHART] 图表创建失败:', error);
+      window.logKeyStep('图表创建失败', { error: error.message });
+      showChartError(canvas.id);
+    }
+  }
+
+  function updateChart(chartId, newData, newOptions = null) {
+    try {
+      const chart = chartInstances.get(chartId);
+      if (!chart) {
+        console.warn('[CHART] 图表实例不存在:', chartId);
+        return;
+      }
+
+      window.logKeyStep('更新图表数据', { id: chartId });
+
+      // 更新数据
+      chart.data = newData;
+      
+      // 更新配置（如果提供）
+      if (newOptions) {
+        chart.options = { ...chart.options, ...newOptions };
+      }
+
+      // 重新渲染
+      chart.update();
+
+      window.logKeyStep('图表数据更新成功', { id: chartId });
+
+    } catch (error) {
+      console.error('[CHART] 图表更新失败:', error);
+      window.logKeyStep('图表更新失败', { error: error.message });
+    }
+  }
+
+  function destroyChart(chartId) {
+    try {
+      const chart = chartInstances.get(chartId);
+      if (chart) {
+        chart.destroy();
+        chartInstances.delete(chartId);
+        window.logKeyStep('图表销毁成功', { id: chartId });
+      }
+    } catch (error) {
+      console.error('[CHART] 图表销毁失败:', error);
+    }
+  }
+
+  function showChartLoading(chartId) {
+    const container = document.getElementById(chartId)?.closest('.chart-wrapper');
+    if (container) {
+      hideChartStates(chartId);
+      const loading = container.querySelector('.chart-loading');
+      if (loading) loading.classList.remove('hidden');
+      const canvas = container.querySelector('.chart-canvas');
+      if (canvas) canvas.style.display = 'none';
+    }
+  }
+
+  function showChartError(chartId) {
+    const container = document.getElementById(chartId)?.closest('.chart-wrapper');
+    if (container) {
+      hideChartStates(chartId);
+      const error = container.querySelector('.chart-error');
+      if (error) error.classList.remove('hidden');
+      const canvas = container.querySelector('.chart-canvas');
+      if (canvas) canvas.style.display = 'none';
+    }
+  }
+
+  function showChartEmpty(chartId) {
+    const container = document.getElementById(chartId)?.closest('.chart-wrapper');
+    if (container) {
+      hideChartStates(chartId);
+      const empty = container.querySelector('.chart-empty');
+      if (empty) empty.classList.remove('hidden');
+      const canvas = container.querySelector('.chart-canvas');
+      if (canvas) canvas.style.display = 'none';
+    }
+  }
+
+  function hideChartStates(chartId) {
+    const container = document.getElementById(chartId)?.closest('.chart-wrapper');
+    if (container) {
+      const states = container.querySelectorAll('.chart-loading, .chart-error, .chart-empty');
+      states.forEach(state => state.classList.add('hidden'));
+    }
+  }
+
+  function retryChart(chartId) {
+    window.logKeyStep('重试加载图表', { id: chartId });
+    const canvas = document.getElementById(chartId);
+    if (canvas) {
+      // 先销毁现有图表
+      destroyChart(chartId);
+      // 重新创建
+      createChart(canvas);
+    }
+  }
+
+  // 导出全局函数
+  window.Chart = window.Chart || {};
+  window.Chart.update = updateChart;
+  window.Chart.destroy = destroyChart;
+  window.Chart.retry = retryChart;
+  window.retryChart = retryChart;
+
+  // 响应式图表大小调整
+  window.addEventListener('resize', () => {
+    chartInstances.forEach((chart, chartId) => {
+      try {
+        chart.resize();
+      } catch (error) {
+        console.warn('[CHART] 图表大小调整失败:', chartId, error);
+      }
+    });
+  });
+</script>
