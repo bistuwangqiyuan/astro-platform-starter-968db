@@ -1,0 +1,61 @@
+---
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="mt-auto border-t border-gray-700/50 bg-complementary/50">
+    <div class="px-4 py-6 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <!-- Brand -->
+            <div class="md:col-span-2">
+                <div class="flex items-center space-x-2 text-lg font-semibold text-white mb-3">
+                    <svg class="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+                    </svg>
+                    <span>数据分析平台</span>
+                </div>
+                <p class="text-gray-300 text-sm leading-relaxed max-w-md">
+                    基于 Astro.js 和 Supabase 构建的现代数据分析平台，提供强大的数据处理、分析和可视化功能。
+                </p>
+            </div>
+            
+            <!-- Quick Links -->
+            <div>
+                <h3 class="text-white font-medium mb-3">快速导航</h3>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="/analyze" class="text-gray-300 hover:text-primary transition-colors">数据分析</a></li>
+                    <li><a href="/favorites" class="text-gray-300 hover:text-primary transition-colors">我的收藏</a></li>
+                    <li><a href="/history" class="text-gray-300 hover:text-primary transition-colors">历史记录</a></li>
+                    <li><a href="/profile" class="text-gray-300 hover:text-primary transition-colors">个人资料</a></li>
+                </ul>
+            </div>
+            
+            <!-- Support -->
+            <div>
+                <h3 class="text-white font-medium mb-3">支持</h3>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="/help" class="text-gray-300 hover:text-primary transition-colors">帮助中心</a></li>
+                    <li><a href="/docs" class="text-gray-300 hover:text-primary transition-colors">API 文档</a></li>
+                    <li><a href="/contact" class="text-gray-300 hover:text-primary transition-colors">联系我们</a></li>
+                    <li><a href="/feedback" class="text-gray-300 hover:text-primary transition-colors">意见反馈</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Bottom Bar -->
+        <div class="mt-6 pt-6 border-t border-gray-700/50">
+            <div class="flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
+                <div class="text-gray-400 text-sm">
+                    © {currentYear} 数据分析平台. 保留所有权利.
+                </div>
+                
+                <div class="flex items-center space-x-4 text-sm text-gray-400">
+                    <a href="/privacy" class="hover:text-primary transition-colors">隐私政策</a>
+                    <span>•</span>
+                    <a href="/terms" class="hover:text-primary transition-colors">服务条款</a>
+                    <span>•</span>
+                    <span>技术支持: Astro + Supabase</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
