@@ -1,11 +1,95 @@
 ---
 interface Props {
+    type?: 'success' | 'error' | 'warning' | 'info' | 'primary';
+    variant?: 'default' | 'filled' | 'outlined';
+    size?: 'sm' | 'md' | 'lg';
+    dismissible?: boolean;
+    autoClose?: boolean;
+    duration?: number;
+    icon?: boolean;
     class?: string;
 }
 
-const { class: className } = Astro.props;
+const { 
+    type = 'info',
+    variant = 'default',
+    size = 'md',
+    dismissible = false,
+    autoClose = false,
+    duration = 5000,
+    icon = true,
+    class: className
+} = Astro.props;
+
+// 根据类型获取对应的样式类
+const getTypeClasses = (type: string, variant: string) => {
+    const baseClasses = 'rounded-lg border';
+    
+    const typeStyles = {
+        success: {
+            default: 'bg-green-50 border-green-200 text-green-800',
+            filled: 'bg-green-500 border-green-500 text-white',
+            outlined: 'bg-transparent border-green-500 text-green-600'
+        },
+        error: {
+            default: 'bg-red-50 border-red-200 text-red-800',
+            filled: 'bg-red-500 border-red-500 text-white',
+            outlined: 'bg-transparent border-red-500 text-red-600'
+        },
+        warning: {
+            default: 'bg-yellow-50 border-yellow-200 text-yellow-800',
+            filled: 'bg-yellow-500 border-yellow-500 text-white',
+            outlined: 'bg-transparent border-yellow-500 text-yellow-600'
+        },
+        info: {
+            default: 'bg-blue-50 border-blue-200 text-blue-800',
+            filled: 'bg-blue-500 border-blue-500 text-white',
+            outlined: 'bg-transparent border-blue-500 text-blue-600'
+        },
+        primary: {
+            default: 'bg-primary/10 border-primary/20 text-primary-content',
+            filled: 'bg-primary border-primary text-primary-content',
+            outlined: 'bg-transparent border-primary text-primary'
+        }
+    };
+    
+    return `${baseClasses} ${typeStyles[type as keyof typeof typeStyles][variant]}`;
+};
+
+// 根据尺寸获取对应的样式类
+const getSizeClasses = (size: string) => {
+    const sizeStyles = {
+        sm: 'p-3 text-sm',
+        md: 'p-4 text-base',
+        lg: 'p-5 text-lg'
+    };
+    
+    return sizeStyles[size as keyof typeof sizeStyles];
+};
+
+// 获取图标
+const getIcon = (type: string) => {
+    const icons = {
+        success: `<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>`,
+        error: `<path d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>`,
+        warning: `<path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.664-.833-2.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"/>`,
+        info: `<path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>`,
+        primary: `<path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>`
+    };
+    
+    return icons[type as keyof typeof icons];
+};
+
+const finalClasses = [
+    'flex items-start gap-3 transition-all duration-300',
+    getTypeClasses(type, variant),
+    getSizeClasses(size),
+    dismissible ? 'pr-10 relative' : '',
+    className
+].filter(Boolean).join(' ');
 ---
 
+<<<<<<< Current (Your changes)
 <div class:list={['flex gap-4 p-4 rounded-sm bg-primary text-primary-content', className]}>
     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 fill-current shrink-0" viewBox="0 0 24 24">
         <path
@@ -14,3 +98,306 @@ const { class: className } = Astro.props;
     </svg>
     <slot />
 </div>
+=======
+<div 
+    class={finalClasses}
+    data-alert-type={type}
+    data-dismissible={dismissible}
+    data-auto-close={autoClose}
+    data-duration={duration}
+>
+    {icon && (
+        <div class="flex-shrink-0">
+            <svg 
+                class="w-5 h-5 mt-0.5" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+            >
+                <Fragment set:html={getIcon(type)} />
+            </svg>
+        </div>
+    )}
+    
+    <div class="flex-1 min-w-0">
+        <slot />
+    </div>
+    
+    {dismissible && (
+        <button 
+            type="button"
+            class={`
+                absolute top-2 right-2 p-1 rounded-md transition-opacity duration-200
+                hover:opacity-70 focus:outline-none focus:ring-2 focus:ring-offset-2
+                ${variant === 'filled' ? 'focus:ring-white/50' : 'focus:ring-current/50'}
+            `}
+            aria-label="关闭提醒"
+            data-dismiss-alert
+        >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+        </button>
+    )}
+</div>
+
+<script>
+    // Alert组件的交互逻辑
+    class AlertManager {
+        constructor() {
+            this.init();
+        }
+        
+        init() {
+            // 处理可关闭的Alert
+            document.addEventListener('click', (e) => {
+                const dismissButton = (e.target as Element)?.closest('[data-dismiss-alert]');
+                if (dismissButton) {
+                    this.dismissAlert(dismissButton.closest('[data-alert-type]'));
+                }
+            });
+            
+            // 处理自动关闭的Alert
+            this.handleAutoClose();
+        }
+        
+        dismissAlert(alertElement: Element | null) {
+            if (!alertElement) return;
+            
+            // 添加淡出动画
+            alertElement.classList.add('opacity-0', 'transform', 'scale-95');
+            
+            // 动画完成后移除元素
+            setTimeout(() => {
+                alertElement.remove();
+                
+                // 触发自定义事件
+                const event = new CustomEvent('alert:dismissed', {
+                    detail: {
+                        type: alertElement.getAttribute('data-alert-type'),
+                        element: alertElement
+                    }
+                });
+                document.dispatchEvent(event);
+            }, 300);
+        }
+        
+        handleAutoClose() {
+            const autoCloseAlerts = document.querySelectorAll('[data-auto-close="true"]');
+            
+            autoCloseAlerts.forEach(alert => {
+                const duration = parseInt(alert.getAttribute('data-duration') || '5000');
+                
+                setTimeout(() => {
+                    this.dismissAlert(alert);
+                }, duration);
+            });
+        }
+        
+        // 动态创建Alert的方法
+        static create(options: {
+            type?: string;
+            message: string;
+            variant?: string;
+            dismissible?: boolean;
+            autoClose?: boolean;
+            duration?: number;
+            container?: string | Element;
+        }) {
+            const {
+                type = 'info',
+                message,
+                variant = 'default',
+                dismissible = true,
+                autoClose = true,
+                duration = 5000,
+                container = document.body
+            } = options;
+            
+            // 创建Alert元素
+            const alertElement = document.createElement('div');
+            alertElement.setAttribute('data-alert-type', type);
+            alertElement.setAttribute('data-dismissible', dismissible.toString());
+            alertElement.setAttribute('data-auto-close', autoClose.toString());
+            alertElement.setAttribute('data-duration', duration.toString());
+            
+            // 设置样式类
+            const typeClasses = this.getTypeClasses(type, variant);
+            const baseClasses = 'flex items-start gap-3 p-4 rounded-lg transition-all duration-300';
+            alertElement.className = `${baseClasses} ${typeClasses} ${dismissible ? 'pr-10 relative' : ''}`;
+            
+            // 创建内容
+            let innerHTML = '';
+            
+            // 添加图标
+            const icon = this.getIcon(type);
+            innerHTML += `
+                <div class="flex-shrink-0">
+                    <svg class="w-5 h-5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        ${icon}
+                    </svg>
+                </div>
+            `;
+            
+            // 添加消息内容
+            innerHTML += `<div class="flex-1 min-w-0">${message}</div>`;
+            
+            // 添加关闭按钮
+            if (dismissible) {
+                innerHTML += `
+                    <button 
+                        type="button"
+                        class="absolute top-2 right-2 p-1 rounded-md transition-opacity duration-200 hover:opacity-70 focus:outline-none focus:ring-2 focus:ring-offset-2 ${variant === 'filled' ? 'focus:ring-white/50' : 'focus:ring-current/50'}"
+                        aria-label="关闭提醒"
+                        data-dismiss-alert
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                `;
+            }
+            
+            alertElement.innerHTML = innerHTML;
+            
+            // 添加到容器
+            const targetContainer = typeof container === 'string' ? 
+                document.querySelector(container) : container;
+            
+            if (targetContainer) {
+                targetContainer.appendChild(alertElement);
+                
+                // 触发动画
+                requestAnimationFrame(() => {
+                    alertElement.classList.add('animate-in');
+                });
+                
+                // 处理自动关闭
+                if (autoClose) {
+                    setTimeout(() => {
+                        new AlertManager().dismissAlert(alertElement);
+                    }, duration);
+                }
+            }
+            
+            return alertElement;
+        }
+        
+        static getTypeClasses(type: string, variant: string) {
+            const typeStyles = {
+                success: {
+                    default: 'bg-green-50 border-green-200 text-green-800 border',
+                    filled: 'bg-green-500 border-green-500 text-white border',
+                    outlined: 'bg-transparent border-green-500 text-green-600 border'
+                },
+                error: {
+                    default: 'bg-red-50 border-red-200 text-red-800 border',
+                    filled: 'bg-red-500 border-red-500 text-white border',
+                    outlined: 'bg-transparent border-red-500 text-red-600 border'
+                },
+                warning: {
+                    default: 'bg-yellow-50 border-yellow-200 text-yellow-800 border',
+                    filled: 'bg-yellow-500 border-yellow-500 text-white border',
+                    outlined: 'bg-transparent border-yellow-500 text-yellow-600 border'
+                },
+                info: {
+                    default: 'bg-blue-50 border-blue-200 text-blue-800 border',
+                    filled: 'bg-blue-500 border-blue-500 text-white border',
+                    outlined: 'bg-transparent border-blue-500 text-blue-600 border'
+                },
+                primary: {
+                    default: 'bg-primary/10 border-primary/20 text-primary-content border',
+                    filled: 'bg-primary border-primary text-primary-content border',
+                    outlined: 'bg-transparent border-primary text-primary border'
+                }
+            } as const;
+            
+            return typeStyles[type as keyof typeof typeStyles]?.[variant as keyof typeof typeStyles.success] || 
+                   typeStyles.info.default;
+        }
+        
+        static getIcon(type: string) {
+            const icons = {
+                success: `<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>`,
+                error: `<path d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>`,
+                warning: `<path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.664-.833-2.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"/>`,
+                info: `<path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>`,
+                primary: `<path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>`
+            };
+            
+            return icons[type as keyof typeof icons] || icons.info;
+        }
+    }
+    
+    // 初始化Alert管理器
+    document.addEventListener('DOMContentLoaded', () => {
+        new AlertManager();
+    });
+    
+    // 如果页面已经加载完成，立即初始化
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => new AlertManager());
+    } else {
+        new AlertManager();
+    }
+    
+    // 导出到全局作用域，便于在其他地方使用
+    (window as any).AlertManager = AlertManager;
+</script>
+
+<style>
+    /* Alert动画样式 */
+    [data-alert-type] {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    
+    [data-alert-type].animate-in {
+        animation: slideInDown 0.3s ease-out;
+    }
+    
+    @keyframes slideInDown {
+        from {
+            transform: translateY(-100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    /* 响应式调整 */
+    @media (max-width: 640px) {
+        [data-alert-type] {
+            margin: 0.5rem;
+            border-radius: 0.5rem;
+        }
+    }
+    
+    /* 深色模式支持 */
+    @media (prefers-color-scheme: dark) {
+        [data-alert-type] {
+            filter: brightness(0.9);
+        }
+    }
+    
+    /* 高对比度模式支持 */
+    @media (prefers-contrast: high) {
+        [data-alert-type] {
+            border-width: 2px;
+        }
+    }
+    
+    /* 减少动画偏好 */
+    @media (prefers-reduced-motion: reduce) {
+        [data-alert-type],
+        [data-alert-type] * {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
+</style>
+>>>>>>> Incoming (Background Agent changes)

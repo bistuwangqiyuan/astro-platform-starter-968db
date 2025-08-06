@@ -1,0 +1,19 @@
+{
+  "name": "Astro Platform Starter",
+  "description": "基于 Astro.js、Tailwind CSS 和 Supabase 的现代化数据分析平台",
+  "repository": "https://github.com/your-username/astro-platform-starter",
+  "env": {
+    "PUBLIC_SUPABASE_URL": {
+      "description": "Supabase 项目 URL",
+      "required": true
+    },
+    "PUBLIC_SUPABASE_ANON_KEY": {
+      "description": "Supabase 匿名密钥",
+      "required": true
+    },
+    "PUBLIC_APP_URL": {
+      "description": "应用的公开 URL (可选)",
+      "required": false
+    }
+  }
+}

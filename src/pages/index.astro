@@ -1,21 +1,190 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import ContextAlert from '../components/ContextAlert.astro';
-import Markdown from '../components/Markdown.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/ui/Button.astro';
 
-const explainer = `
-An Astro website can go way beyond static pages - on the right platform.
-
-Netlify supports not only [Streaming SSR](https://docs.astro.build/en/guides/server-side-rendering/#html-streaming) and fast [Edge Middleware](https://docs.astro.build/en/guides/middleware/), but also [on-demand revalidation](https://www.netlify.com/blog/cache-tags-and-purge-api-on-netlify/) and [stale-while-revalidate](https://www.netlify.com/blog/swr-and-fine-grained-cache-control/). 
-Any page or data can be rebuilt only when needed, without site visitors ever getting a performance hit.
-`;
+const title = '首页';
+const description = '欢迎使用Astro平台 - 现代化的数据分析和管理解决方案';
 ---
 
-<Layout title="Welcome to Astro.">
-    <ContextAlert class="mb-8" />
-    <h1 class="mb-10">Netlify Platform Starter for Astro</h1>
-    <Markdown content={explainer} class="mb-10 text-lg" />
-    <p>
-        <a href="https://docs.netlify.com/frameworks/astro/" class="btn btn-lg sm:min-w-64">Read the Docs</a>
-    </p>
-</Layout>
+<BaseLayout title={title} description={description}>
+  <!-- 英雄区域 -->
+  <section class="py-20 bg-gradient-primary text-white">
+    <div class="text-center max-w-4xl mx-auto px-4">
+      <h1 class="text-5xl md:text-6xl font-bold mb-6 animate-fade-in">
+        现代化数据分析平台
+      </h1>
+      <p class="text-xl md:text-2xl mb-8 text-blue-100 animate-slide-up">
+        基于Astro.js、Tailwind和Supabase构建的强大数据处理和可视化解决方案
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up">
+        <Button href="/auth/register" size="lg" variant="secondary">
+          立即开始
+        </Button>
+        <Button href="/analyze" size="lg" variant="ghost">
+          数据分析
+        </Button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 功能特性 -->
+  <section class="py-20">
+    <div class="text-center mb-16">
+      <h2 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+        核心功能
+      </h2>
+      <p class="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+        提供完整的数据分析工作流，从数据处理到可视化展示
+      </p>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <!-- 数据分析 -->
+      <div class="card group hover:shadow-lg transition-all duration-300">
+        <div class="card-body text-center">
+          <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+            <svg class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold mb-3 text-gray-900 dark:text-gray-100">
+            智能数据分析
+          </h3>
+          <p class="text-gray-600 dark:text-gray-400 mb-4">
+            支持单个和批量数据分析，提供多维度的数据洞察和趋势分析
+          </p>
+          <Button href="/analyze" variant="ghost" size="sm">
+            开始分析 →
+          </Button>
+        </div>
+      </div>
+
+      <!-- 收藏管理 -->
+      <div class="card group hover:shadow-lg transition-all duration-300">
+        <div class="card-body text-center">
+          <div class="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+            <svg class="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold mb-3 text-gray-900 dark:text-gray-100">
+            收藏管理
+          </h3>
+          <p class="text-gray-600 dark:text-gray-400 mb-4">
+            保存重要的分析结果，便于后续查看和分享，建立个人数据资产库
+          </p>
+          <Button href="/favorites" variant="ghost" size="sm">
+            我的收藏 →
+          </Button>
+        </div>
+      </div>
+
+      <!-- 历史记录 -->
+      <div class="card group hover:shadow-lg transition-all duration-300">
+        <div class="card-body text-center">
+          <div class="w-16 h-16 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+            <svg class="w-8 h-8 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold mb-3 text-gray-900 dark:text-gray-100">
+            历史追踪
+          </h3>
+          <p class="text-gray-600 dark:text-gray-400 mb-4">
+            完整的操作历史记录，追踪分析过程，确保数据处理的可追溯性
+          </p>
+          <Button href="/history" variant="ghost" size="sm">
+            查看历史 →
+          </Button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 技术特性 -->
+  <section class="py-20 bg-gray-50 dark:bg-gray-800">
+    <div class="text-center mb-16">
+      <h2 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+        技术优势
+      </h2>
+      <p class="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+        采用现代化技术栈，确保性能、安全性和用户体验
+      </p>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <!-- Astro.js -->
+      <div class="text-center p-6">
+        <div class="w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-lg flex items-center justify-center mx-auto mb-4">
+          <span class="text-2xl font-bold text-orange-600 dark:text-orange-400">A</span>
+        </div>
+        <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-2">Astro.js</h3>
+        <p class="text-sm text-gray-600 dark:text-gray-400">现代化前端框架，零JS运行时</p>
+      </div>
+
+      <!-- Tailwind CSS -->
+      <div class="text-center p-6">
+        <div class="w-12 h-12 bg-cyan-100 dark:bg-cyan-900 rounded-lg flex items-center justify-center mx-auto mb-4">
+          <span class="text-2xl font-bold text-cyan-600 dark:text-cyan-400">T</span>
+        </div>
+        <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-2">Tailwind</h3>
+        <p class="text-sm text-gray-600 dark:text-gray-400">实用优先的CSS框架</p>
+      </div>
+
+      <!-- Supabase -->
+      <div class="text-center p-6">
+        <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mx-auto mb-4">
+          <span class="text-2xl font-bold text-green-600 dark:text-green-400">S</span>
+        </div>
+        <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-2">Supabase</h3>
+        <p class="text-sm text-gray-600 dark:text-gray-400">开源的Firebase替代方案</p>
+      </div>
+
+      <!-- TypeScript -->
+      <div class="text-center p-6">
+        <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mx-auto mb-4">
+          <span class="text-2xl font-bold text-blue-600 dark:text-blue-400">TS</span>
+        </div>
+        <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-2">TypeScript</h3>
+        <p class="text-sm text-gray-600 dark:text-gray-400">类型安全的JavaScript</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA区域 -->
+  <section class="py-20">
+    <div class="text-center max-w-3xl mx-auto">
+      <h2 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+        准备开始您的数据分析之旅？
+      </h2>
+      <p class="text-xl text-gray-600 dark:text-gray-400 mb-8">
+        立即注册，体验强大的数据分析功能，让数据驱动您的决策
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <Button href="/auth/register" size="lg" variant="primary">
+          免费注册
+        </Button>
+        <Button href="/auth/login" size="lg" variant="secondary">
+          立即登录
+        </Button>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* Reason: 自定义渐变背景 */
+  .bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+  
+  /* Reason: 卡片悬停效果增强 */
+  .card:hover {
+    transform: translateY(-4px);
+  }
+  
+  /* Reason: 确保图标有平滑的过渡效果 */
+  .group:hover .w-16 {
+    transform: scale(1.1);
+  }
+</style>

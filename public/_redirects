@@ -1,0 +1,5 @@
+# API路由重写
+/api/*  /.netlify/functions/:splat  200
+
+# 处理客户端路由
+/*    /index.html   200
