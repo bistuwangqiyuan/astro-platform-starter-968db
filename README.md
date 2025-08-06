@@ -195,10 +195,14 @@ All commands are run from the root of the project, from a terminal:
 
 ### 部署指南
 
-- **完整部署指南**: [DEPLOY.md](./DEPLOY.md)
-- **快速部署**: [QUICK_DEPLOY.md](./QUICK_DEPLOY.md)
-- **手动部署**: [MANUAL_DEPLOY_GUIDE.md](./MANUAL_DEPLOY_GUIDE.md)
-- **部署检查清单**: [DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md)
+- **🚀 项目就绪**: [READY_TO_DEPLOY.md](./READY_TO_DEPLOY.md) - **项目已准备好部署！**
+- **🚨 紧急部署**: [EMERGENCY_DEPLOY_GUIDE.md](./EMERGENCY_DEPLOY_GUIDE.md) - 立即可部署版本
+- **📋 完整指南**: [DEPLOY.md](./DEPLOY.md) - 完整部署说明
+- **⚡ 快速部署**: [QUICK_DEPLOY.md](./QUICK_DEPLOY.md) - 快速开始
+- **📱 手动部署**: [MANUAL_DEPLOY_GUIDE.md](./MANUAL_DEPLOY_GUIDE.md) - 手动操作指南
+- **🔧 网络问题**: [NETWORK_ISSUE_SOLUTIONS.md](./NETWORK_ISSUE_SOLUTIONS.md) - 网络问题解决
+- **💻 离线构建**: [OFFLINE_BUILD_GUIDE.md](./OFFLINE_BUILD_GUIDE.md) - 离线操作指南
+- **✅ 检查清单**: [DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md) - 部署检查
 
 ## Developing Locally
 
