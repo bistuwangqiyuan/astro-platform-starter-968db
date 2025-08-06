@@ -8,358 +8,345 @@ const description = '创建您的账户，开始使用Astro平台的强大功能
 ---
 
 <BaseLayout title={title} description={description} containerClass="container-sm">
-  <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8">
-      <!-- 头部 -->
-      <div class="text-center">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">
-          创建账户
-        </h1>
-        <p class="mt-2 text-gray-600 dark:text-gray-400">
-          立即加入我们，体验强大的数据分析功能
-        </p>
-      </div>
-
-      <!-- 注册表单 -->
-      <div class="card">
-        <div class="card-body">
-          <!-- 错误提示 -->
-          <div id="error-alert" class="alert alert-error hidden mb-6" role="alert">
-            <span id="error-message"></span>
-          </div>
-
-          <!-- 成功提示 -->
-          <div id="success-alert" class="alert alert-success hidden mb-6" role="alert">
-            <span id="success-message"></span>
-          </div>
-
-          <form id="register-form" class="space-y-6">
-            <!-- 姓名 -->
-            <Input
-              id="name"
-              name="name"
-              type="text"
-              label="姓名"
-              placeholder="请输入您的姓名（可选）"
-              autocomplete="name"
-              helpText="用于个性化您的体验"
-            />
-
-            <!-- 邮箱 -->
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              label="邮箱地址"
-              placeholder="请输入您的邮箱"
-              required={true}
-              autocomplete="email"
-              helpText="我们将发送验证邮件到此邮箱"
-            />
-
-            <!-- 密码 -->
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              label="密码"
-              placeholder="请输入密码"
-              required={true}
-              autocomplete="new-password"
-              helpText="密码长度至少6位"
-            />
-
-            <!-- 确认密码 -->
-            <Input
-              id="confirmPassword"
-              name="confirmPassword"
-              type="password"
-              label="确认密码"
-              placeholder="请再次输入密码"
-              required={true}
-              autocomplete="new-password"
-            />
-
-            <!-- 同意条款 -->
-            <div class="flex items-start">
-              <input
-                id="terms"
-                name="terms"
-                type="checkbox"
-                required
-                class="h-4 w-4 mt-1 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              >
-              <label for="terms" class="ml-2 block text-sm text-gray-900 dark:text-gray-300">
-                我已阅读并同意
-                <a href="/privacy" class="text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300" target="_blank">
-                  隐私政策
-                </a>
-                和
-                <a href="/terms" class="text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300" target="_blank">
-                  服务条款
-                </a>
-              </label>
+    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-md w-full space-y-8">
+            <!-- 头部 -->
+            <div class="text-center">
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">创建账户</h1>
+                <p class="mt-2 text-gray-600 dark:text-gray-400">立即加入我们，体验强大的数据分析功能</p>
             </div>
 
-            <!-- 注册按钮 -->
-            <Button
-              id="register-button"
-              type="submit"
-              variant="primary"
-              class="w-full"
-            >
-              <span id="register-text">创建账户</span>
-            </Button>
-          </form>
+            <!-- 注册表单 -->
+            <div class="card">
+                <div class="card-body">
+                    <!-- 错误提示 -->
+                    <div id="error-alert" class="alert alert-error hidden mb-6" role="alert">
+                        <span id="error-message"></span>
+                    </div>
 
-          <!-- 分隔线 -->
-          <div class="mt-6">
-            <div class="relative">
-              <div class="absolute inset-0 flex items-center">
-                <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
-              </div>
-              <div class="relative flex justify-center text-sm">
-                <span class="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
-                  或者
-                </span>
-              </div>
+                    <!-- 成功提示 -->
+                    <div id="success-alert" class="alert alert-success hidden mb-6" role="alert">
+                        <span id="success-message"></span>
+                    </div>
+
+                    <form id="register-form" class="space-y-6">
+                        <!-- 姓名 -->
+                        <Input
+                            id="name"
+                            name="name"
+                            type="text"
+                            label="姓名"
+                            placeholder="请输入您的姓名（可选）"
+                            autocomplete="name"
+                            helpText="用于个性化您的体验"
+                        />
+
+                        <!-- 邮箱 -->
+                        <Input
+                            id="email"
+                            name="email"
+                            type="email"
+                            label="邮箱地址"
+                            placeholder="请输入您的邮箱"
+                            required={true}
+                            autocomplete="email"
+                            helpText="我们将发送验证邮件到此邮箱"
+                        />
+
+                        <!-- 密码 -->
+                        <Input
+                            id="password"
+                            name="password"
+                            type="password"
+                            label="密码"
+                            placeholder="请输入密码"
+                            required={true}
+                            autocomplete="new-password"
+                            helpText="密码长度至少6位"
+                        />
+
+                        <!-- 确认密码 -->
+                        <Input
+                            id="confirmPassword"
+                            name="confirmPassword"
+                            type="password"
+                            label="确认密码"
+                            placeholder="请再次输入密码"
+                            required={true}
+                            autocomplete="new-password"
+                        />
+
+                        <!-- 同意条款 -->
+                        <div class="flex items-start">
+                            <input
+                                id="terms"
+                                name="terms"
+                                type="checkbox"
+                                required
+                                class="h-4 w-4 mt-1 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                            />
+                            <label for="terms" class="ml-2 block text-sm text-gray-900 dark:text-gray-300">
+                                我已阅读并同意
+                                <a href="/privacy" class="text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300" target="_blank">
+                                    隐私政策
+                                </a>
+                                和
+                                <a href="/terms" class="text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300" target="_blank">
+                                    服务条款
+                                </a>
+                            </label>
+                        </div>
+
+                        <!-- 注册按钮 -->
+                        <Button id="register-button" type="submit" variant="primary" class="w-full">
+                            <span id="register-text">创建账户</span>
+                        </Button>
+                    </form>
+
+                    <!-- 分隔线 -->
+                    <div class="mt-6">
+                        <div class="relative">
+                            <div class="absolute inset-0 flex items-center">
+                                <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
+                            </div>
+                            <div class="relative flex justify-center text-sm">
+                                <span class="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400"> 或者 </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 登录链接 -->
+                    <div class="mt-6 text-center">
+                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                            已有账户？
+                            <a href="/auth/login" class="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">
+                                立即登录
+                            </a>
+                        </p>
+                    </div>
+                </div>
             </div>
-          </div>
 
-          <!-- 登录链接 -->
-          <div class="mt-6 text-center">
-            <p class="text-sm text-gray-600 dark:text-gray-400">
-              已有账户？
-              <a href="/auth/login" class="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">
-                立即登录
-              </a>
-            </p>
-          </div>
+            <!-- 返回首页 -->
+            <div class="text-center">
+                <a href="/" class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"> ← 返回首页 </a>
+            </div>
         </div>
-      </div>
-
-      <!-- 返回首页 -->
-      <div class="text-center">
-        <a href="/" class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-          ← 返回首页
-        </a>
-      </div>
     </div>
-  </div>
 </BaseLayout>
 
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('register-form') as HTMLFormElement;
-    const registerButton = document.getElementById('register-button') as HTMLButtonElement;
-    const registerText = document.getElementById('register-text') as HTMLSpanElement;
-    const errorAlert = document.getElementById('error-alert') as HTMLDivElement;
-    const errorMessage = document.getElementById('error-message') as HTMLSpanElement;
-    const successAlert = document.getElementById('success-alert') as HTMLDivElement;
-    const successMessage = document.getElementById('success-message') as HTMLSpanElement;
-    const passwordInput = document.getElementById('password') as HTMLInputElement;
-    const confirmPasswordInput = document.getElementById('confirmPassword') as HTMLInputElement;
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('register-form') as HTMLFormElement;
+        const registerButton = document.getElementById('register-button') as HTMLButtonElement;
+        const registerText = document.getElementById('register-text') as HTMLSpanElement;
+        const errorAlert = document.getElementById('error-alert') as HTMLDivElement;
+        const errorMessage = document.getElementById('error-message') as HTMLSpanElement;
+        const successAlert = document.getElementById('success-alert') as HTMLDivElement;
+        const successMessage = document.getElementById('success-message') as HTMLSpanElement;
+        const passwordInput = document.getElementById('password') as HTMLInputElement;
+        const confirmPasswordInput = document.getElementById('confirmPassword') as HTMLInputElement;
 
-    // Reason: 显示错误信息
-    function showError(message: string) {
-      errorMessage.textContent = message;
-      errorAlert.classList.remove('hidden');
-      successAlert.classList.add('hidden');
-      console.error('[Register] 错误:', message);
-    }
-
-    // Reason: 显示成功信息
-    function showSuccess(message: string) {
-      successMessage.textContent = message;
-      successAlert.classList.remove('hidden');
-      errorAlert.classList.add('hidden');
-      console.log('[Register] 成功:', message);
-    }
-
-    // Reason: 隐藏所有提示
-    function hideAlerts() {
-      errorAlert.classList.add('hidden');
-      successAlert.classList.add('hidden');
-    }
-
-    // Reason: 设置加载状态
-    function setLoading(loading: boolean) {
-      if (loading) {
-        registerButton.disabled = true;
-        registerButton.setAttribute('loading', 'true');
-        registerText.textContent = '注册中...';
-      } else {
-        registerButton.disabled = false;
-        registerButton.removeAttribute('loading');
-        registerText.textContent = '创建账户';
-      }
-    }
-
-    // Reason: 密码强度验证
-    function validatePassword(password: string): string | null {
-      if (password.length < 6) {
-        return '密码长度不能少于6位';
-      }
-      return null;
-    }
-
-    // Reason: 密码一致性验证
-    function validatePasswordConfirm() {
-      const password = passwordInput.value;
-      const confirmPassword = confirmPasswordInput.value;
-      
-      if (confirmPassword && password !== confirmPassword) {
-        const confirmInput = confirmPasswordInput.closest('.space-y-1') as HTMLElement;
-        const errorElement = confirmInput?.querySelector('[role="alert"]') as HTMLElement;
-        if (errorElement) {
-          errorElement.textContent = '密码确认不一致';
-          errorElement.classList.remove('hidden');
-        }
-        confirmPasswordInput.classList.add('input-error');
-      } else {
-        const confirmInput = confirmPasswordInput.closest('.space-y-1') as HTMLElement;
-        const errorElement = confirmInput?.querySelector('[role="alert"]') as HTMLElement;
-        if (errorElement) {
-          errorElement.classList.add('hidden');
-        }
-        confirmPasswordInput.classList.remove('input-error');
-      }
-    }
-
-    // Reason: 实时密码验证
-    passwordInput.addEventListener('input', () => {
-      validatePasswordConfirm();
-    });
-
-    confirmPasswordInput.addEventListener('input', () => {
-      validatePasswordConfirm();
-    });
-
-    // Reason: 表单提交处理
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      
-      console.log('[Register] 开始注册流程');
-      hideAlerts();
-      setLoading(true);
-
-      try {
-        const formData = new FormData(form);
-        const name = formData.get('name') as string;
-        const email = formData.get('email') as string;
-        const password = formData.get('password') as string;
-        const confirmPassword = formData.get('confirmPassword') as string;
-        const terms = formData.get('terms') as string;
-
-        // Reason: 客户端验证
-        if (!email || !password || !confirmPassword) {
-          showError('请填写所有必填字段');
-          setLoading(false);
-          return;
+        // Reason: 显示错误信息
+        function showError(message: string) {
+            errorMessage.textContent = message;
+            errorAlert.classList.remove('hidden');
+            successAlert.classList.add('hidden');
+            console.error('[Register] 错误:', message);
         }
 
-        if (!terms) {
-          showError('请阅读并同意服务条款和隐私政策');
-          setLoading(false);
-          return;
+        // Reason: 显示成功信息
+        function showSuccess(message: string) {
+            successMessage.textContent = message;
+            successAlert.classList.remove('hidden');
+            errorAlert.classList.add('hidden');
+            console.log('[Register] 成功:', message);
+        }
+
+        // Reason: 隐藏所有提示
+        function hideAlerts() {
+            errorAlert.classList.add('hidden');
+            successAlert.classList.add('hidden');
+        }
+
+        // Reason: 设置加载状态
+        function setLoading(loading: boolean) {
+            if (loading) {
+                registerButton.disabled = true;
+                registerButton.setAttribute('loading', 'true');
+                registerText.textContent = '注册中...';
+            } else {
+                registerButton.disabled = false;
+                registerButton.removeAttribute('loading');
+                registerText.textContent = '创建账户';
+            }
         }
 
         // Reason: 密码强度验证
-        const passwordError = validatePassword(password);
-        if (passwordError) {
-          showError(passwordError);
-          setLoading(false);
-          return;
+        function validatePassword(password: string): string | null {
+            if (password.length < 6) {
+                return '密码长度不能少于6位';
+            }
+            return null;
         }
 
         // Reason: 密码一致性验证
-        if (password !== confirmPassword) {
-          showError('密码确认不一致');
-          setLoading(false);
-          return;
+        function validatePasswordConfirm() {
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+
+            if (confirmPassword && password !== confirmPassword) {
+                const confirmInput = confirmPasswordInput.closest('.space-y-1') as HTMLElement;
+                const errorElement = confirmInput?.querySelector('[role="alert"]') as HTMLElement;
+                if (errorElement) {
+                    errorElement.textContent = '密码确认不一致';
+                    errorElement.classList.remove('hidden');
+                }
+                confirmPasswordInput.classList.add('input-error');
+            } else {
+                const confirmInput = confirmPasswordInput.closest('.space-y-1') as HTMLElement;
+                const errorElement = confirmInput?.querySelector('[role="alert"]') as HTMLElement;
+                if (errorElement) {
+                    errorElement.classList.add('hidden');
+                }
+                confirmPasswordInput.classList.remove('input-error');
+            }
         }
 
-        // Reason: 发送注册请求
-        const response = await fetch('/api/auth/register', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            name: name || undefined,
-            email,
-            password,
-            confirmPassword
-          })
+        // Reason: 实时密码验证
+        passwordInput.addEventListener('input', () => {
+            validatePasswordConfirm();
         });
 
-        const result = await response.json();
+        confirmPasswordInput.addEventListener('input', () => {
+            validatePasswordConfirm();
+        });
 
-        if (result.success) {
-          showSuccess(result.message || '注册成功！请检查邮箱验证链接。');
-          
-          // Reason: 清空表单
-          form.reset();
-          
-          console.log('[Register] 注册成功');
-          
-          // Reason: 延迟跳转到登录页面
-          setTimeout(() => {
-            window.location.href = '/auth/login?message=注册成功，请登录';
-          }, 3000);
-        } else {
-          showError(result.error || '注册失败，请重试');
-          setLoading(false);
-        }
-      } catch (error) {
-        console.error('[Register] 注册过程出错:', error);
-        showError('网络错误，请检查网络连接后重试');
-        setLoading(false);
-      }
+        // Reason: 表单提交处理
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            console.log('[Register] 开始注册流程');
+            hideAlerts();
+            setLoading(true);
+
+            try {
+                const formData = new FormData(form);
+                const name = formData.get('name') as string;
+                const email = formData.get('email') as string;
+                const password = formData.get('password') as string;
+                const confirmPassword = formData.get('confirmPassword') as string;
+                const terms = formData.get('terms') as string;
+
+                // Reason: 客户端验证
+                if (!email || !password || !confirmPassword) {
+                    showError('请填写所有必填字段');
+                    setLoading(false);
+                    return;
+                }
+
+                if (!terms) {
+                    showError('请阅读并同意服务条款和隐私政策');
+                    setLoading(false);
+                    return;
+                }
+
+                // Reason: 密码强度验证
+                const passwordError = validatePassword(password);
+                if (passwordError) {
+                    showError(passwordError);
+                    setLoading(false);
+                    return;
+                }
+
+                // Reason: 密码一致性验证
+                if (password !== confirmPassword) {
+                    showError('密码确认不一致');
+                    setLoading(false);
+                    return;
+                }
+
+                // Reason: 发送注册请求
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: name || undefined,
+                        email,
+                        password,
+                        confirmPassword
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showSuccess(result.message || '注册成功！请检查邮箱验证链接。');
+
+                    // Reason: 清空表单
+                    form.reset();
+
+                    console.log('[Register] 注册成功');
+
+                    // Reason: 延迟跳转到登录页面
+                    setTimeout(() => {
+                        window.location.href = '/auth/login?message=注册成功，请登录';
+                    }, 3000);
+                } else {
+                    showError(result.error || '注册失败，请重试');
+                    setLoading(false);
+                }
+            } catch (error) {
+                console.error('[Register] 注册过程出错:', error);
+                showError('网络错误，请检查网络连接后重试');
+                setLoading(false);
+            }
+        });
+
+        // Reason: 输入框聚焦时隐藏错误提示
+        const inputs = form.querySelectorAll('input');
+        inputs.forEach((input) => {
+            input.addEventListener('focus', () => {
+                hideAlerts();
+            });
+        });
+
+        console.log('[Register] 注册页面初始化完成');
     });
-
-    // Reason: 输入框聚焦时隐藏错误提示
-    const inputs = form.querySelectorAll('input');
-    inputs.forEach(input => {
-      input.addEventListener('focus', () => {
-        hideAlerts();
-      });
-    });
-
-    console.log('[Register] 注册页面初始化完成');
-  });
 </script>
 
 <style>
-  /* Reason: 注册页面的特殊样式 */
-  .min-h-screen {
-    min-height: calc(100vh - 4rem); /* 减去header高度 */
-  }
-  
-  /* Reason: 表单动画效果 */
-  .card {
-    animation: slideUp 0.5s ease-out;
-  }
-  
-  /* Reason: 输入框聚焦增强效果 */
-  input:focus {
-    transform: scale(1.02);
-    transition: transform 0.2s ease;
-  }
-  
-  /* Reason: 链接悬停效果 */
-  a {
-    transition: color 0.2s ease;
-  }
-  
-  /* Reason: 错误和成功提示的动画 */
-  .alert {
-    animation: fadeIn 0.3s ease-out;
-  }
-  
-  /* Reason: 复选框样式增强 */
-  input[type="checkbox"]:checked {
-    background-color: #3b82f6;
-    border-color: #3b82f6;
-  }
+    /* Reason: 注册页面的特殊样式 */
+    .min-h-screen {
+        min-height: calc(100vh - 4rem); /* 减去header高度 */
+    }
+
+    /* Reason: 表单动画效果 */
+    .card {
+        animation: slideUp 0.5s ease-out;
+    }
+
+    /* Reason: 输入框聚焦增强效果 */
+    input:focus {
+        transform: scale(1.02);
+        transition: transform 0.2s ease;
+    }
+
+    /* Reason: 链接悬停效果 */
+    a {
+        transition: color 0.2s ease;
+    }
+
+    /* Reason: 错误和成功提示的动画 */
+    .alert {
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    /* Reason: 复选框样式增强 */
+    input[type='checkbox']:checked {
+        background-color: #3b82f6;
+        border-color: #3b82f6;
+    }
 </style>
