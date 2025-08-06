@@ -1,0 +1,187 @@
+---
+import Header from '../components/layout/Header.astro';
+import Footer from '../components/layout/Footer.astro';
+import '../styles/globals.css';
+
+export interface Props {
+  title: string;
+  description?: string;
+  showHeader?: boolean;
+  showFooter?: boolean;
+  containerClass?: string;
+}
+
+const { 
+  title = 'Astro Platform Starter',
+  description = '基于Astro.js、Tailwind和Supabase的现代化平台',
+  showHeader = true,
+  showFooter = true,
+  containerClass = 'container'
+} = Astro.props;
+
+// Reason: 生成SEO友好的页面元数据
+const siteUrl = import.meta.env.PUBLIC_APP_URL || 'http://localhost:4321';
+const fullTitle = title ? `${title} | Astro Platform Starter` : 'Astro Platform Starter';
+---
+
+<!DOCTYPE html>
+<html lang="zh-CN" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content={description} />
+  <meta name="generator" content={Astro.generator} />
+  
+  <!-- SEO Meta Tags -->
+  <title>{fullTitle}</title>
+  <meta name="description" content={description} />
+  <meta name="keywords" content="Astro, Tailwind, Supabase, 数据分析, 现代化平台" />
+  <meta name="author" content="Astro Platform Team" />
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={siteUrl} />
+  <meta property="og:title" content={fullTitle} />
+  <meta property="og:description" content={description} />
+  <meta property="og:site_name" content="Astro Platform Starter" />
+  
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:url" content={siteUrl} />
+  <meta property="twitter:title" content={fullTitle} />
+  <meta property="twitter:description" content={description} />
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="apple-touch-icon" href="/favicon.svg" />
+  
+  <!-- Preconnect to improve performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  
+  <!-- Theme and Color Scheme -->
+  <meta name="theme-color" content="#667eea" />
+  <meta name="color-scheme" content="light dark" />
+  
+  <!-- Prevent zoom on mobile when focusing inputs -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+</head>
+
+<body class="h-full flex flex-col bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+  <!-- Skip to main content for accessibility -->
+  <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-blue-600 text-white px-4 py-2 rounded-lg z-50">
+    跳转到主要内容
+  </a>
+  
+  <!-- Header -->
+  {showHeader && (
+    <Header />
+  )}
+  
+  <!-- Main Content -->
+  <main id="main-content" class="flex-1 w-full">
+    <div class={containerClass}>
+      <!-- Reason: 为页面内容提供淡入动画效果 -->
+      <div class="animate-fade-in">
+        <slot />
+      </div>
+    </div>
+  </main>
+  
+  <!-- Footer -->
+  {showFooter && (
+    <Footer />
+  )}
+  
+  <!-- Global Scripts -->
+  <script>
+    // Reason: 深色模式主题切换功能
+    function initTheme() {
+      const theme = localStorage.getItem('theme') || 
+        (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      
+      document.documentElement.classList.toggle('dark', theme === 'dark');
+      localStorage.setItem('theme', theme);
+    }
+    
+    // 初始化主题
+    initTheme();
+    
+    // 监听系统主题变化
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+      if (!localStorage.getItem('theme')) {
+        document.documentElement.classList.toggle('dark', e.matches);
+      }
+    });
+    
+    // Reason: 全局主题切换函数
+    window.toggleTheme = function() {
+      const isDark = document.documentElement.classList.contains('dark');
+      const newTheme = isDark ? 'light' : 'dark';
+      
+      document.documentElement.classList.toggle('dark', newTheme === 'dark');
+      localStorage.setItem('theme', newTheme);
+      
+      console.log(`[Theme] 切换到${newTheme === 'dark' ? '深色' : '浅色'}模式`);
+    };
+    
+    // Reason: 全局错误处理
+    window.addEventListener('error', (event) => {
+      console.error('[Global Error]:', event.error);
+    });
+    
+    window.addEventListener('unhandledrejection', (event) => {
+      console.error('[Unhandled Promise Rejection]:', event.reason);
+    });
+    
+    // Reason: 页面加载完成日志
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log(`[Page] ${document.title} 加载完成`);
+    });
+  </script>
+  
+  <!-- Service Worker Registration (for PWA support) -->
+  <script>
+    // Reason: 注册Service Worker实现PWA功能
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', async () => {
+        try {
+          // 注释掉Service Worker注册，因为还没有创建sw.js文件
+          // const registration = await navigator.serviceWorker.register('/sw.js');
+          // console.log('[SW] Service Worker注册成功:', registration);
+        } catch (error) {
+          // console.error('[SW] Service Worker注册失败:', error);
+        }
+      });
+    }
+  </script>
+</body>
+</html>
+
+<style>
+  /* Reason: 确保页面在加载时有平滑的过渡效果 */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Reason: 自定义焦点指示器，提升可访问性 */
+  *:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+  }
+  
+  /* Reason: 减少动画对于偏好减少动效的用户 */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+    
+    html {
+      scroll-behavior: auto;
+    }
+  }
+</style>

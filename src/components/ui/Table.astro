@@ -1,0 +1,381 @@
+---
+export interface Column {
+  key: string;
+  label: string;
+  sortable?: boolean;
+  width?: string;
+  align?: 'left' | 'center' | 'right';
+  render?: (value: any, row: any) => string;
+}
+
+export interface Props {
+  columns: Column[];
+  data: any[];
+  loading?: boolean;
+  empty?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  striped?: boolean;
+  hoverable?: boolean;
+  bordered?: boolean;
+  compact?: boolean;
+  class?: string;
+  tableClass?: string;
+}
+
+const {
+  columns,
+  data,
+  loading = false,
+  empty = '暂无数据',
+  sortBy,
+  sortOrder = 'asc',
+  striped = true,
+  hoverable = true,
+  bordered = false,
+  compact = false,
+  class: className = '',
+  tableClass = ''
+} = Astro.props;
+
+// Reason: 生成表格样式类
+const tableClasses = [
+  'table',
+  striped && 'table-striped',
+  hoverable && 'table-hover',
+  bordered && 'table-bordered',
+  compact && 'table-compact',
+  tableClass
+].filter(Boolean).join(' ');
+
+// Reason: 排序数据
+const sortedData = sortBy && data.length > 0 
+  ? [...data].sort((a, b) => {
+      const aValue = a[sortBy];
+      const bValue = b[sortBy];
+      
+      if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
+      return 0;
+    })
+  : data;
+
+// Reason: 渲染单元格内容
+function renderCell(column: Column, row: any) {
+  const value = row[column.key];
+  
+  if (column.render) {
+    return column.render(value, row);
+  }
+  
+  if (value === null || value === undefined) {
+    return '-';
+  }
+  
+  return String(value);
+}
+
+// Reason: 生成对齐样式类
+function getAlignClass(align?: string) {
+  switch (align) {
+    case 'center': return 'text-center';
+    case 'right': return 'text-right';
+    default: return 'text-left';
+  }
+}
+---
+
+<div class={`table-container ${className}`}>
+  <!-- 加载状态 -->
+  {loading && (
+    <div class="flex items-center justify-center py-12">
+      <div class="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
+        <div class="spinner w-5 h-5"></div>
+        <span>加载中...</span>
+      </div>
+    </div>
+  )}
+  
+  {!loading && (
+    <>
+      <!-- 表格内容 -->
+      {sortedData.length > 0 ? (
+        <div class="overflow-x-auto">
+          <table class={tableClasses}>
+            <!-- 表头 -->
+            <thead class="table-header">
+              <tr>
+                {columns.map((column) => (
+                  <th 
+                    class={`${getAlignClass(column.align)} ${column.sortable ? 'sortable-header cursor-pointer select-none' : ''}`}
+                    style={column.width ? `width: ${column.width}` : undefined}
+                    data-sort-key={column.sortable ? column.key : undefined}
+                    title={column.sortable ? `点击排序${column.label}` : undefined}
+                  >
+                    <div class="flex items-center space-x-1">
+                      <span>{column.label}</span>
+                      {column.sortable && (
+                        <div class="sort-indicators flex flex-col">
+                          <svg 
+                            class={`w-3 h-3 ${sortBy === column.key && sortOrder === 'asc' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400'}`}
+                            fill="currentColor" 
+                            viewBox="0 0 20 20"
+                          >
+                            <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
+                          </svg>
+                          <svg 
+                            class={`w-3 h-3 -mt-1 ${sortBy === column.key && sortOrder === 'desc' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400'}`}
+                            fill="currentColor" 
+                            viewBox="0 0 20 20"
+                          >
+                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            
+            <!-- 表体 -->
+            <tbody class="table-body">
+              {sortedData.map((row, index) => (
+                <tr class="table-row" data-row-index={index}>
+                  {columns.map((column) => (
+                    <td class={getAlignClass(column.align)}>
+                      <Fragment set:html={renderCell(column, row)} />
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <!-- 空状态 -->
+        <div class="flex flex-col items-center justify-center py-12 text-gray-500 dark:text-gray-400">
+          <svg class="w-12 h-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          <p class="text-lg font-medium">{empty}</p>
+        </div>
+      )}
+    </>
+  )}
+</div>
+
+<script>
+  // Reason: 表格排序功能
+  document.addEventListener('DOMContentLoaded', () => {
+    const tableHeaders = document.querySelectorAll('.sortable-header');
+    
+    tableHeaders.forEach(header => {
+      header.addEventListener('click', () => {
+        const sortKey = header.getAttribute('data-sort-key');
+        if (!sortKey) return;
+        
+        // 获取当前排序状态
+        const currentSortBy = new URLSearchParams(window.location.search).get('sortBy');
+        const currentSortOrder = new URLSearchParams(window.location.search).get('sortOrder') || 'asc';
+        
+        // 计算新的排序状态
+        let newSortOrder = 'asc';
+        if (currentSortBy === sortKey && currentSortOrder === 'asc') {
+          newSortOrder = 'desc';
+        }
+        
+        // 更新URL参数
+        const url = new URL(window.location);
+        url.searchParams.set('sortBy', sortKey);
+        url.searchParams.set('sortOrder', newSortOrder);
+        
+        // 刷新页面以应用新的排序
+        window.location.href = url.toString();
+        
+        console.log(`[Table] 排序: ${sortKey} ${newSortOrder}`);
+      });
+    });
+    
+    // Reason: 表格行点击事件（可选）
+    const tableRows = document.querySelectorAll('.table-row');
+    tableRows.forEach(row => {
+      row.addEventListener('click', (event) => {
+        // 如果点击的是链接或按钮，不触发行点击事件
+        const target = event.target as HTMLElement;
+        if (target.tagName === 'A' || target.tagName === 'BUTTON' || target.closest('a, button')) {
+          return;
+        }
+        
+        const rowIndex = row.getAttribute('data-row-index');
+        console.log(`[Table] 点击行: ${rowIndex}`);
+        
+        // 可以在这里添加行点击逻辑，比如跳转到详情页
+        // const rowData = sortedData[parseInt(rowIndex)];
+        // window.location.href = `/details/${rowData.id}`;
+      });
+    });
+  });
+</script>
+
+<style>
+  /* Reason: 表格容器样式 */
+  .table-container {
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+  
+  .dark .table-container {
+    background: #1f2937;
+  }
+  
+  /* Reason: 表格基础样式 */
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  /* Reason: 条纹样式 */
+  .table-striped .table-body tr:nth-child(even) {
+    background-color: #f9fafb;
+  }
+  
+  .dark .table-striped .table-body tr:nth-child(even) {
+    background-color: #374151;
+  }
+  
+  /* Reason: 悬停样式 */
+  .table-hover .table-body tr:hover {
+    background-color: #f3f4f6;
+    cursor: pointer;
+  }
+  
+  .dark .table-hover .table-body tr:hover {
+    background-color: #4b5563;
+  }
+  
+  /* Reason: 边框样式 */
+  .table-bordered {
+    border: 1px solid #e5e7eb;
+  }
+  
+  .dark .table-bordered {
+    border-color: #374151;
+  }
+  
+  .table-bordered th,
+  .table-bordered td {
+    border: 1px solid #e5e7eb;
+  }
+  
+  .dark .table-bordered th,
+  .dark .table-bordered td {
+    border-color: #374151;
+  }
+  
+  /* Reason: 紧凑样式 */
+  .table-compact th,
+  .table-compact td {
+    padding: 0.5rem 0.75rem;
+  }
+  
+  /* Reason: 排序头部样式 */
+  .sortable-header {
+    position: relative;
+    transition: background-color 0.2s ease;
+  }
+  
+  .sortable-header:hover {
+    background-color: #f3f4f6;
+  }
+  
+  .dark .sortable-header:hover {
+    background-color: #4b5563;
+  }
+  
+  /* Reason: 排序指示器样式 */
+  .sort-indicators {
+    min-width: 12px;
+  }
+  
+  /* Reason: 响应式表格 */
+  @media (max-width: 640px) {
+    .table-container {
+      margin: 0 -1rem;
+      border-radius: 0;
+      box-shadow: none;
+      border-top: 1px solid #e5e7eb;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .dark .table-container {
+      border-color: #374151;
+    }
+    
+    .table th,
+    .table td {
+      padding: 0.75rem 0.5rem;
+      font-size: 0.875rem;
+    }
+    
+    .table th:first-child,
+    .table td:first-child {
+      padding-left: 1rem;
+    }
+    
+    .table th:last-child,
+    .table td:last-child {
+      padding-right: 1rem;
+    }
+  }
+  
+  /* Reason: 加载动画 */
+  .spinner {
+    border: 2px solid #e5e7eb;
+    border-top: 2px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  /* Reason: 表格滚动阴影效果 */
+  .table-container {
+    position: relative;
+  }
+  
+  .table-container::before,
+  .table-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 20px;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 10;
+  }
+  
+  .table-container::before {
+    left: 0;
+    background: linear-gradient(to right, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+  }
+  
+  .table-container::after {
+    right: 0;
+    background: linear-gradient(to left, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+  }
+  
+  .dark .table-container::before {
+    background: linear-gradient(to right, rgba(31, 41, 55, 1), rgba(31, 41, 55, 0));
+  }
+  
+  .dark .table-container::after {
+    background: linear-gradient(to left, rgba(31, 41, 55, 1), rgba(31, 41, 55, 0));
+  }
+</style>

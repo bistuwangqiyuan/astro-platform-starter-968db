@@ -1,0 +1,244 @@
+---
+export interface Props {
+  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search';
+  name?: string;
+  id?: string;
+  value?: string;
+  placeholder?: string;
+  required?: boolean;
+  disabled?: boolean;
+  readonly?: boolean;
+  error?: string;
+  label?: string;
+  helpText?: string;
+  autocomplete?: string;
+  min?: string | number;
+  max?: string | number;
+  step?: string | number;
+  pattern?: string;
+  class?: string;
+  inputClass?: string;
+  'aria-describedby'?: string;
+}
+
+const {
+  type = 'text',
+  name,
+  id,
+  value,
+  placeholder,
+  required = false,
+  disabled = false,
+  readonly = false,
+  error,
+  label,
+  helpText,
+  autocomplete,
+  min,
+  max,
+  step,
+  pattern,
+  class: className = '',
+  inputClass = '',
+  'aria-describedby': ariaDescribedBy,
+  ...rest
+} = Astro.props;
+
+// Reason: 生成唯一的ID，如果没有提供的话
+const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`;
+const errorId = `${inputId}-error`;
+const helpId = `${inputId}-help`;
+
+// Reason: 根据错误状态生成样式类
+const inputClasses = [
+  'input',
+  error && 'input-error',
+  inputClass
+].filter(Boolean).join(' ');
+
+// Reason: 生成aria-describedby属性
+const describedBy = [
+  ariaDescribedBy,
+  error && errorId,
+  helpText && helpId
+].filter(Boolean).join(' ');
+
+// Reason: 准备输入框属性
+const inputProps = {
+  type,
+  name,
+  id: inputId,
+  value,
+  placeholder,
+  required,
+  disabled,
+  readonly,
+  autocomplete,
+  min,
+  max,
+  step,
+  pattern,
+  class: inputClasses,
+  'aria-invalid': error ? 'true' : undefined,
+  'aria-describedby': describedBy || undefined,
+  ...rest
+};
+---
+
+<div class={`space-y-1 ${className}`}>
+  <!-- 标签 -->
+  {label && (
+    <label 
+      for={inputId} 
+      class={`label ${required ? 'label-required' : ''}`}
+    >
+      {label}
+    </label>
+  )}
+  
+  <!-- 输入框容器 -->
+  <div class="relative">
+    <input {...inputProps}>
+    
+    <!-- 必填指示器 -->
+    {required && !label && (
+      <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+        <span class="text-red-500 text-sm" aria-hidden="true">*</span>
+      </div>
+    )}
+    
+    <!-- 错误图标 -->
+    {error && (
+      <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+        <svg 
+          class="w-5 h-5 text-red-500" 
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path 
+            stroke-linecap="round" 
+            stroke-linejoin="round" 
+            stroke-width="2" 
+            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+          />
+        </svg>
+      </div>
+    )}
+  </div>
+  
+  <!-- 错误信息 -->
+  {error && (
+    <p 
+      id={errorId}
+      class="text-sm text-red-600 dark:text-red-400 animate-slide-up"
+      role="alert"
+      aria-live="polite"
+    >
+      {error}
+    </p>
+  )}
+  
+  <!-- 帮助文本 -->
+  {helpText && !error && (
+    <p 
+      id={helpId}
+      class="text-sm text-gray-600 dark:text-gray-400"
+    >
+      {helpText}
+    </p>
+  )}
+</div>
+
+<style>
+  /* Reason: 输入框的过渡效果 */
+  .input {
+    transition: all 0.2s ease-in-out;
+  }
+  
+  /* Reason: 聚焦时的增强样式 */
+  .input:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  }
+  
+  /* Reason: 错误状态的特殊动画 */
+  .input-error {
+    animation: shake 0.5s ease-in-out;
+  }
+  
+  /* Reason: 只读状态的样式 */
+  .input:read-only {
+    background-color: #f9fafb;
+    cursor: default;
+  }
+  
+  .dark .input:read-only {
+    background-color: #374151;
+  }
+  
+  /* Reason: 禁用状态的样式 */
+  .input:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+  
+  /* Reason: 占位符文本的样式 */
+  .input::placeholder {
+    color: #9ca3af;
+    transition: color 0.2s ease-in-out;
+  }
+  
+  .dark .input::placeholder {
+    color: #6b7280;
+  }
+  
+  .input:focus::placeholder {
+    color: #d1d5db;
+  }
+  
+  .dark .input:focus::placeholder {
+    color: #4b5563;
+  }
+  
+  /* Reason: 数字输入框的样式调整 */
+  .input[type="number"] {
+    -moz-appearance: textfield;
+  }
+  
+  .input[type="number"]::-webkit-outer-spin-button,
+  .input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  
+  /* Reason: 搜索输入框的样式调整 */
+  .input[type="search"] {
+    -webkit-appearance: none;
+  }
+  
+  .input[type="search"]::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+  }
+  
+  /* Reason: 错误抖动动画 */
+  @keyframes shake {
+    0%, 100% {
+      transform: translateX(0);
+    }
+    10%, 30%, 50%, 70%, 90% {
+      transform: translateX(-2px);
+    }
+    20%, 40%, 60%, 80% {
+      transform: translateX(2px);
+    }
+  }
+  
+  /* Reason: 确保在移动设备上有良好的体验 */
+  @media (max-width: 640px) {
+    .input {
+      font-size: 16px; /* 防止iOS缩放 */
+    }
+  }
+</style>

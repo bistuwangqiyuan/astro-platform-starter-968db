@@ -1,0 +1,133 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/ui/Button.astro';
+
+const title = '页面未找到';
+const description = '抱歉，您访问的页面不存在';
+---
+
+<BaseLayout title={title} description={description}>
+  <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full text-center space-y-8">
+      <!-- 404 图标 -->
+      <div class="animate-bounce">
+        <div class="mx-auto h-32 w-32 text-gray-400 dark:text-gray-500">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-full h-full">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.034 0-3.9.785-5.291 2.073m0 0a7.962 7.962 0 00-2.073 5.291c0 1.985.725 3.801 1.925 5.291A7.962 7.962 0 0012 21c2.034 0 3.9-.785 5.291-2.073m0 0a7.962 7.962 0 002.073-5.291c0-1.985-.725-3.801-1.925-5.291A7.962 7.962 0 0012 3c-2.034 0-3.9.785-5.291 2.073"></path>
+          </svg>
+        </div>
+      </div>
+
+      <!-- 错误信息 -->
+      <div>
+        <h1 class="text-6xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+          404
+        </h1>
+        <h2 class="text-3xl font-semibold text-gray-700 dark:text-gray-300 mb-4">
+          页面未找到
+        </h2>
+        <p class="text-lg text-gray-600 dark:text-gray-400 mb-8">
+          抱歉，您访问的页面不存在或已被移动。
+        </p>
+      </div>
+
+      <!-- 操作按钮 -->
+      <div class="space-y-4">
+        <Button href="/" variant="primary" size="lg" class="w-full">
+          返回首页
+        </Button>
+        <div class="flex gap-4">
+          <Button href="/analyze" variant="secondary" class="flex-1">
+            数据分析
+          </Button>
+          <Button href="/auth/login" variant="ghost" class="flex-1">
+            用户登录
+          </Button>
+        </div>
+      </div>
+
+      <!-- 搜索建议 -->
+      <div class="mt-8 p-6 bg-gray-50 dark:bg-gray-800 rounded-lg">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-3">
+          您可能在寻找：
+        </h3>
+        <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+          <li>
+            <a href="/" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+              • 首页 - 了解平台功能
+            </a>
+          </li>
+          <li>
+            <a href="/analyze" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+              • 数据分析 - 开始分析数据
+            </a>
+          </li>
+          <li>
+            <a href="/favorites" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+              • 我的收藏 - 查看收藏的分析
+            </a>
+          </li>
+          <li>
+            <a href="/history" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+              • 操作历史 - 查看历史记录
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- 报告问题 -->
+      <div class="text-sm text-gray-500 dark:text-gray-400">
+        如果您认为这是一个错误，请
+        <a href="/contact" class="text-blue-600 dark:text-blue-400 hover:underline">
+          联系我们
+        </a>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Reason: 记录404页面访问日志
+    console.log('[404] 页面未找到:', window.location.pathname);
+    
+    // Reason: 可选：发送404统计数据到分析服务
+    // analytics.track('404_page_view', {
+    //   path: window.location.pathname,
+    //   referrer: document.referrer
+    // });
+  });
+</script>
+
+<style>
+  /* Reason: 404页面的特殊动画效果 */
+  .animate-bounce {
+    animation: bounce 2s infinite;
+  }
+  
+  @keyframes bounce {
+    0%, 20%, 53%, 80%, 100% {
+      transform: translate3d(0, 0, 0);
+    }
+    40%, 43% {
+      transform: translate3d(0, -30px, 0);
+    }
+    70% {
+      transform: translate3d(0, -15px, 0);
+    }
+    90% {
+      transform: translate3d(0, -4px, 0);
+    }
+  }
+  
+  /* Reason: 页面淡入效果 */
+  .min-h-screen > div {
+    animation: fadeIn 0.6s ease-out;
+  }
+  
+  /* Reason: 悬停效果增强 */
+  a:hover {
+    transform: translateX(4px);
+    transition: transform 0.2s ease;
+  }
+</style>
