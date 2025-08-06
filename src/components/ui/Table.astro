@@ -1,0 +1,112 @@
+---
+export interface Props {
+  variant?: 'default' | 'striped' | 'bordered';
+  size?: 'sm' | 'md' | 'lg';
+  responsive?: boolean;
+  class?: string;
+  id?: string;
+}
+
+const {
+  variant = 'default',
+  size = 'md',
+  responsive = true,
+  class: className = '',
+  id
+} = Astro.props;
+
+// Reason: 根据不同变体和尺寸提供对应的表格样式
+const variantClasses = {
+  default: 'border-gray-700',
+  striped: 'border-gray-700',
+  bordered: 'border border-gray-600'
+};
+
+const sizeClasses = {
+  sm: 'text-sm',
+  md: 'text-sm',
+  lg: 'text-base'
+};
+
+const paddingClasses = {
+  sm: '[&_th]:px-3 [&_th]:py-2 [&_td]:px-3 [&_td]:py-2',
+  md: '[&_th]:px-4 [&_th]:py-3 [&_td]:px-4 [&_td]:py-3',
+  lg: '[&_th]:px-6 [&_th]:py-4 [&_td]:px-6 [&_td]:py-4'
+};
+
+const baseClasses = 'w-full text-left text-white bg-gray-800 rounded-lg overflow-hidden';
+
+const tableClasses = [
+  baseClasses,
+  variantClasses[variant],
+  sizeClasses[size],
+  paddingClasses[size],
+  variant === 'striped' ? '[&_tbody_tr:nth-child(odd)]:bg-gray-750' : '',
+  className
+].filter(Boolean).join(' ');
+
+const containerClasses = responsive 
+  ? 'overflow-x-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800'
+  : '';
+---
+
+<div class={containerClasses}>
+  <table
+    class={tableClasses}
+    id={id}
+  >
+    <slot />
+  </table>
+</div>
+
+<style>
+  /* Reason: 自定义滚动条样式以匹配深色主题 */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+  
+  .scrollbar-thumb-gray-600::-webkit-scrollbar-thumb {
+    background-color: #4b5563;
+    border-radius: 4px;
+  }
+  
+  .scrollbar-track-gray-800::-webkit-scrollbar-track {
+    background-color: #1f2937;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+  }
+  
+  /* 表格头部样式 */
+  :global(table thead th) {
+    background-color: #374151;
+    font-weight: 600;
+    border-bottom: 2px solid #4b5563;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  
+  /* 表格边框 */
+  :global(table.bordered td),
+  :global(table.bordered th) {
+    border: 1px solid #4b5563;
+  }
+  
+  /* 悬停效果 */
+  :global(table tbody tr:hover) {
+    background-color: #374151;
+    transition: background-color 0.2s ease;
+  }
+  
+  /* 表格行边框 */
+  :global(table tbody tr) {
+    border-bottom: 1px solid #374151;
+  }
+  
+  :global(table tbody tr:last-child) {
+    border-bottom: none;
+  }
+</style>

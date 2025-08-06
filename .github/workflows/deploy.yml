@@ -1,0 +1,235 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  NODE_VERSION: '18'
+  NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+  NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+
+jobs:
+  # 代码质量检查
+  lint-and-test:
+    runs-on: ubuntu-latest
+    name: 🧪 Lint and Test
+    
+    steps:
+    - name: 📚 Checkout
+      uses: actions/checkout@v4
+      
+    - name: 🏗 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: 📦 Install dependencies
+      run: |
+        npm ci
+        
+    - name: 🔍 Run ESLint
+      run: |
+        npx eslint . --ext .js,.ts,.astro --ignore-path .gitignore || true
+        
+    - name: 🧪 Run tests
+      run: |
+        npm run test:run
+        
+    - name: 📊 Generate test coverage
+      run: |
+        npm run test:coverage
+        
+    - name: 📤 Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage/lcov.info
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+  # 构建项目
+  build:
+    runs-on: ubuntu-latest
+    name: 🏗️ Build
+    needs: lint-and-test
+    
+    steps:
+    - name: 📚 Checkout
+      uses: actions/checkout@v4
+      
+    - name: 🏗 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: 📦 Install dependencies
+      run: npm ci
+      
+    - name: 🏗️ Build project
+      run: |
+        npm run build
+      env:
+        APP_ENV: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
+        PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
+        PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}
+        
+    - name: 📤 Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: dist
+        path: dist/
+        retention-days: 1
+
+  # 部署到 Netlify
+  deploy:
+    runs-on: ubuntu-latest
+    name: 🚀 Deploy to Netlify
+    needs: build
+    if: github.event_name == 'push'
+    
+    steps:
+    - name: 📚 Checkout
+      uses: actions/checkout@v4
+      
+    - name: 📥 Download build artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: dist
+        path: dist/
+        
+    - name: 🏗 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        
+    - name: 📦 Install Netlify CLI
+      run: npm install -g netlify-cli
+      
+    - name: 🚀 Deploy to Netlify
+      run: |
+        if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+          echo "部署到生产环境"
+          netlify deploy --prod --dir=dist --site=$NETLIFY_SITE_ID --auth=$NETLIFY_AUTH_TOKEN
+        else
+          echo "部署到预览环境"
+          netlify deploy --dir=dist --site=$NETLIFY_SITE_ID --auth=$NETLIFY_AUTH_TOKEN
+        fi
+      
+    - name: 🔍 Run health check
+      run: |
+        sleep 30
+        DEPLOY_URL=$(netlify status --site=$NETLIFY_SITE_ID --auth=$NETLIFY_AUTH_TOKEN --json | jq -r '.url')
+        echo "检查部署URL: $DEPLOY_URL"
+        
+        # 检查主页
+        if curl -f -s "$DEPLOY_URL" > /dev/null; then
+          echo "✅ 主页响应正常"
+        else
+          echo "❌ 主页无法访问"
+          exit 1
+        fi
+        
+        # 检查API健康状态
+        if curl -f -s "$DEPLOY_URL/api/health" > /dev/null; then
+          echo "✅ API健康检查通过"
+        else
+          echo "⚠️ API健康检查失败"
+        fi
+        
+    - name: 📝 Update deployment status
+      if: github.ref == 'refs/heads/main'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          github.rest.repos.createDeploymentStatus({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            deployment_id: context.payload.deployment?.id,
+            state: 'success',
+            environment_url: 'https://your-site.netlify.app',
+            description: '部署成功'
+          });
+
+  # 安全检查
+  security-check:
+    runs-on: ubuntu-latest
+    name: 🔒 Security Check
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: 📚 Checkout
+      uses: actions/checkout@v4
+      
+    - name: 🏗 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: 📦 Install dependencies
+      run: npm ci
+      
+    - name: 🔒 Run security audit
+      run: |
+        npm audit --audit-level moderate
+        
+    - name: 🔍 Check for secrets
+      uses: trufflesecurity/trufflehog@main
+      with:
+        path: ./
+        base: main
+        head: HEAD
+        extra_args: --debug --only-verified
+
+  # 性能检查
+  lighthouse:
+    runs-on: ubuntu-latest
+    name: 🚦 Lighthouse CI
+    needs: deploy
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: 📚 Checkout
+      uses: actions/checkout@v4
+      
+    - name: 🏗 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        
+    - name: 📦 Install Lighthouse CI
+      run: npm install -g @lhci/cli
+      
+    - name: 🚦 Run Lighthouse CI
+      run: |
+        lhci autorun
+      env:
+        LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+        LHCI_BUILD_CONTEXT__CURRENT_HASH: ${{ github.sha }}
+        LHCI_BUILD_CONTEXT__COMMIT_TIME: ${{ github.event.head_commit.timestamp }}
+
+  # 通知
+  notify:
+    runs-on: ubuntu-latest
+    name: 📢 Notify
+    needs: [deploy, lighthouse]
+    if: always()
+    
+    steps:
+    - name: 📢 Notify deployment status
+      uses: 8398a7/action-slack@v3
+      if: env.SLACK_WEBHOOK_URL != null
+      with:
+        status: ${{ job.status }}
+        text: |
+          🚀 部署状态: ${{ job.status }}
+          📝 提交: ${{ github.event.head_commit.message }}
+          🔗 分支: ${{ github.ref }}
+          👤 作者: ${{ github.actor }}
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

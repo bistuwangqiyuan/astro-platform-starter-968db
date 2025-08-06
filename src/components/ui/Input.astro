@@ -1,0 +1,66 @@
+---
+export interface Props {
+  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search';
+  size?: 'sm' | 'md' | 'lg';
+  variant?: 'default' | 'error' | 'success';
+  placeholder?: string;
+  value?: string;
+  name?: string;
+  id?: string;
+  required?: boolean;
+  disabled?: boolean;
+  readonly?: boolean;
+  class?: string;
+  [key: string]: any;
+}
+
+const {
+  type = 'text',
+  size = 'md',
+  variant = 'default',
+  placeholder,
+  value,
+  name,
+  id,
+  required = false,
+  disabled = false,
+  readonly = false,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+// Reason: 根据不同变体和尺寸提供对应的样式类
+const variantClasses = {
+  default: 'border-gray-600 focus:border-primary focus:ring-primary',
+  error: 'border-red-500 focus:border-red-500 focus:ring-red-500',
+  success: 'border-green-500 focus:border-green-500 focus:ring-green-500'
+};
+
+const sizeClasses = {
+  sm: 'px-3 py-1.5 text-sm',
+  md: 'px-3 py-2 text-sm',
+  lg: 'px-4 py-3 text-base'
+};
+
+const baseClasses = 'w-full bg-gray-700 border rounded-md text-white placeholder-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-0 disabled:opacity-50 disabled:cursor-not-allowed readonly:opacity-75 readonly:cursor-default';
+
+const inputClasses = [
+  baseClasses,
+  variantClasses[variant],
+  sizeClasses[size],
+  className
+].filter(Boolean).join(' ');
+---
+
+<input
+  type={type}
+  class={inputClasses}
+  placeholder={placeholder}
+  value={value}
+  name={name}
+  id={id}
+  required={required}
+  disabled={disabled}
+  readonly={readonly}
+  {...rest}
+/>

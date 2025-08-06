@@ -1,0 +1,164 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Alert from '../../components/Alert.astro';
+import Button from '../../components/ui/Button.astro';
+import Input from '../../components/ui/Input.astro';
+---
+
+<Layout title="用户登录">
+  <div class="max-w-md mx-auto mt-16">
+    <div class="bg-gray-800 p-8 rounded-lg shadow-lg">
+      <h1 class="text-2xl font-bold text-center mb-8">用户登录</h1>
+      
+      <div id="alert-container" class="mb-6"></div>
+      
+      <form id="login-form" class="space-y-6">
+        <div>
+          <label for="email" class="block text-sm font-medium mb-2">邮箱地址</label>
+          <Input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="请输入邮箱地址"
+            required
+          />
+        </div>
+        
+        <div>
+          <label for="password" class="block text-sm font-medium mb-2">密码</label>
+          <Input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="请输入密码"
+            required
+          />
+        </div>
+        
+        <Button
+          type="submit"
+          id="login-btn"
+          class="w-full"
+          size="lg"
+        >
+          <span id="login-text">登录</span>
+          <span id="login-loading" class="hidden">
+            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            登录中...
+          </span>
+        </Button>
+      </form>
+      
+      <div class="mt-6 text-center">
+        <p class="text-gray-400">
+          还没有账户？
+          <a href="/auth/register" class="text-primary hover:text-primary/80 font-medium">立即注册</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  // Reason: 在客户端处理登录表单提交，提供良好用户体验
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('login-form') as HTMLFormElement;
+    const emailInput = document.getElementById('email') as HTMLInputElement;
+    const passwordInput = document.getElementById('password') as HTMLInputElement;
+    const loginBtn = document.getElementById('login-btn') as HTMLButtonElement;
+    const loginText = document.getElementById('login-text') as HTMLSpanElement;
+    const loginLoading = document.getElementById('login-loading') as HTMLSpanElement;
+    const alertContainer = document.getElementById('alert-container') as HTMLDivElement;
+    
+    // 显示提示消息
+    function showAlert(message: string, type: 'success' | 'error' | 'info' = 'info') {
+      const alertClass = type === 'error' ? 'bg-red-600' : type === 'success' ? 'bg-green-600' : 'bg-blue-600';
+      alertContainer.innerHTML = `
+        <div class="${alertClass} text-white p-4 rounded-lg">
+          ${message}
+        </div>
+      `;
+      
+      // 5秒后自动隐藏
+      setTimeout(() => {
+        alertContainer.innerHTML = '';
+      }, 5000);
+    }
+    
+    // 设置加载状态
+    function setLoading(loading: boolean) {
+      loginBtn.disabled = loading;
+      loginText.classList.toggle('hidden', loading);
+      loginLoading.classList.toggle('hidden', !loading);
+    }
+    
+    // 处理表单提交
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+      
+      // 前端验证
+      if (!email || !password) {
+        showAlert('请填写所有必需字段', 'error');
+        return;
+      }
+      
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        showAlert('邮箱格式不正确', 'error');
+        return;
+      }
+      
+      if (password.length < 6) {
+        showAlert('密码长度至少为6位', 'error');
+        return;
+      }
+      
+      try {
+        setLoading(true);
+        console.log('提交登录表单:', { email });
+        
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, password }),
+        });
+        
+        const result = await response.json();
+        console.log('登录API响应:', { success: result.success, status: response.status });
+        
+        if (result.success) {
+          showAlert('登录成功，正在跳转...', 'success');
+          
+          // Reason: 登录成功后跳转到首页或之前访问的页面
+          const redirectUrl = new URLSearchParams(window.location.search).get('redirect') || '/';
+          setTimeout(() => {
+            window.location.href = redirectUrl;
+          }, 1000);
+        } else {
+          console.error('登录失败:', result.error);
+          showAlert(result.error || '登录失败，请重试', 'error');
+        }
+      } catch (error) {
+        console.error('登录请求发生错误:', error);
+        showAlert('网络错误，请检查网络连接后重试', 'error');
+      } finally {
+        setLoading(false);
+      }
+    });
+    
+    // 回车键快捷提交
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !loginBtn.disabled) {
+        form.dispatchEvent(new Event('submit'));
+      }
+    });
+  });
+</script>

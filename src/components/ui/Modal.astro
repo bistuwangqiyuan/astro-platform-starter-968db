@@ -1,0 +1,210 @@
+---
+export interface Props {
+  id: string;
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  backdrop?: 'static' | 'clickable';
+  class?: string;
+}
+
+const {
+  id,
+  size = 'md',
+  backdrop = 'clickable',
+  class: className = ''
+} = Astro.props;
+
+// Reason: 根据不同尺寸提供对应的模态框宽度
+const sizeClasses = {
+  sm: 'max-w-md',
+  md: 'max-w-lg',
+  lg: 'max-w-2xl',
+  xl: 'max-w-4xl'
+};
+
+const modalClasses = [
+  'relative bg-gray-800 rounded-lg shadow-xl transform transition-all',
+  sizeClasses[size],
+  'w-full mx-4',
+  className
+].filter(Boolean).join(' ');
+---
+
+<div
+  id={id}
+  class="fixed inset-0 z-50 overflow-y-auto hidden"
+  aria-labelledby={`${id}-title`}
+  aria-modal="true"
+  role="dialog"
+>
+  <!-- 背景遮罩 -->
+  <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+    <div 
+      class="fixed inset-0 transition-opacity bg-gray-900 bg-opacity-75 modal-backdrop"
+      data-backdrop={backdrop}
+      aria-hidden="true"
+    ></div>
+
+    <!-- 垂直居中的辅助元素 -->
+    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+    <!-- 模态框内容 -->
+    <div class={modalClasses}>
+      <!-- 头部 -->
+      <div class="flex items-center justify-between p-6 border-b border-gray-700">
+        <div>
+          <slot name="header" />
+        </div>
+        <button
+          type="button"
+          class="text-gray-400 hover:text-gray-300 focus:outline-none focus:text-gray-300 transition-colors modal-close"
+          aria-label="关闭"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- 主体内容 -->
+      <div class="p-6">
+        <slot name="body" />
+      </div>
+
+      <!-- 底部 -->
+      <div class="flex items-center justify-end px-6 py-3 space-x-3 border-t border-gray-700 bg-gray-750 rounded-b-lg">
+        <slot name="footer" />
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Reason: 提供模态框的显示、隐藏和交互功能
+  document.addEventListener('DOMContentLoaded', () => {
+    // 模态框工具类
+    class Modal {
+      private element: HTMLElement;
+      private backdrop: HTMLElement;
+      private closeButtons: NodeListOf<HTMLElement>;
+      private isOpen: boolean = false;
+
+      constructor(modalId: string) {
+        this.element = document.getElementById(modalId) as HTMLElement;
+        if (!this.element) {
+          console.error(`Modal with id '${modalId}' not found`);
+          return;
+        }
+
+        this.backdrop = this.element.querySelector('.modal-backdrop') as HTMLElement;
+        this.closeButtons = this.element.querySelectorAll('.modal-close');
+        this.init();
+      }
+
+      private init() {
+        // 关闭按钮事件
+        this.closeButtons.forEach(button => {
+          button.addEventListener('click', () => this.hide());
+        });
+
+        // 背景点击事件
+        if (this.backdrop) {
+          this.backdrop.addEventListener('click', (e) => {
+            const backdropType = this.backdrop.getAttribute('data-backdrop');
+            if (backdropType === 'clickable') {
+              this.hide();
+            }
+          });
+        }
+
+        // ESC键关闭
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && this.isOpen) {
+            this.hide();
+          }
+        });
+      }
+
+      show() {
+        if (this.isOpen) return;
+        
+        console.log('显示模态框:', this.element.id);
+        this.element.classList.remove('hidden');
+        document.body.style.overflow = 'hidden'; // 禁止页面滚动
+        this.isOpen = true;
+        
+        // 触发显示事件
+        this.element.dispatchEvent(new CustomEvent('modal:show'));
+      }
+
+      hide() {
+        if (!this.isOpen) return;
+        
+        console.log('隐藏模态框:', this.element.id);
+        this.element.classList.add('hidden');
+        document.body.style.overflow = ''; // 恢复页面滚动
+        this.isOpen = false;
+        
+        // 触发隐藏事件
+        this.element.dispatchEvent(new CustomEvent('modal:hide'));
+      }
+
+      toggle() {
+        if (this.isOpen) {
+          this.hide();
+        } else {
+          this.show();
+        }
+      }
+
+      getElement() {
+        return this.element;
+      }
+
+      isVisible() {
+        return this.isOpen;
+      }
+    }
+
+    // 初始化所有模态框
+    const modals = document.querySelectorAll('[role="dialog"]');
+    const modalInstances: { [key: string]: Modal } = {};
+
+    modals.forEach((modal) => {
+      const modalId = modal.id;
+      if (modalId) {
+        modalInstances[modalId] = new Modal(modalId);
+      }
+    });
+
+    // 全局模态框控制函数
+    (window as any).showModal = (modalId: string) => {
+      const modal = modalInstances[modalId];
+      if (modal) {
+        modal.show();
+      } else {
+        console.error(`Modal '${modalId}' not found`);
+      }
+    };
+
+    (window as any).hideModal = (modalId: string) => {
+      const modal = modalInstances[modalId];
+      if (modal) {
+        modal.hide();
+      } else {
+        console.error(`Modal '${modalId}' not found`);
+      }
+    };
+
+    (window as any).toggleModal = (modalId: string) => {
+      const modal = modalInstances[modalId];
+      if (modal) {
+        modal.toggle();
+      } else {
+        console.error(`Modal '${modalId}' not found`);
+      }
+    };
+
+    // 导出模态框实例供其他脚本使用
+    (window as any).modalInstances = modalInstances;
+  });
+</script>
