@@ -1,0 +1,296 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/ui/Button.astro';
+import { getCurrentUser } from '../utils/auth';
+
+// 确保用户已登录（中间件会处理重定向）
+const user = await getCurrentUser();
+---
+
+<BaseLayout title="我的收藏">
+  <div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-8">我的收藏</h1>
+    
+    <!-- 收藏列表 -->
+    <div id="favoritesList" class="space-y-6">
+      <div class="text-center py-8">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+        <p class="text-gray-500 mt-4">加载中...</p>
+      </div>
+    </div>
+    
+    <!-- 分页控件 -->
+    <div id="pagination" class="mt-8 flex justify-center space-x-2 hidden"></div>
+    
+    <!-- 空状态 -->
+    <div id="emptyState" class="text-center py-12 hidden">
+      <p class="text-gray-500 mb-4">您还没有收藏任何分析</p>
+      <Button href="/analyze" variant="primary">
+        去分析文本
+      </Button>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  // 日志函数
+  const log = (message: string, data?: any) => {
+    console.log(`[Favorites] ${message}`, data || '');
+  };
+  
+  // DOM 元素
+  const favoritesList = document.getElementById('favoritesList') as HTMLDivElement;
+  const pagination = document.getElementById('pagination') as HTMLDivElement;
+  const emptyState = document.getElementById('emptyState') as HTMLDivElement;
+  
+  let currentPage = 1;
+  const limit = 10;
+  
+  // 格式化日期
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('zh-CN', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+  
+  // 渲染收藏项
+  const renderFavoriteItem = (favorite: any) => {
+    const analysis = favorite.analysis;
+    if (!analysis) return '';
+    
+    const result = analysis.result;
+    const keywords = result.keywords || [];
+    
+    return `
+      <div class="bg-white rounded-lg shadow p-6" data-favorite-id="${favorite.id}">
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <h3 class="text-lg font-semibold mb-2">
+              ${result.summary || '无摘要'}
+            </h3>
+            <p class="text-sm text-gray-500">
+              收藏于 ${formatDate(favorite.created_at)}
+            </p>
+          </div>
+          <button 
+            class="delete-btn text-red-600 hover:text-red-800"
+            data-id="${favorite.id}"
+          >
+            删除
+          </button>
+        </div>
+        
+        <div class="text-gray-700 mb-4">
+          <p class="line-clamp-3">
+            ${analysis.content}
+          </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <p class="text-sm text-gray-600">
+              <span class="font-medium">字数：</span>${result.statistics?.words || 0}
+            </p>
+            <p class="text-sm text-gray-600">
+              <span class="font-medium">句子数：</span>${result.statistics?.sentences || 0}
+            </p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-600">
+              <span class="font-medium">情感：</span>${result.sentiment || '未知'}
+            </p>
+            <p class="text-sm text-gray-600">
+              <span class="font-medium">可读性：</span>${result.readability || '未知'}
+            </p>
+          </div>
+        </div>
+        
+        ${keywords.length > 0 ? `
+          <div>
+            <p class="text-sm font-medium text-gray-700 mb-2">关键词：</p>
+            <div class="flex flex-wrap gap-2">
+              ${keywords.map((keyword: string) => 
+                `<span class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-sm">${keyword}</span>`
+              ).join('')}
+            </div>
+          </div>
+        ` : ''}
+        
+        <div class="mt-4 pt-4 border-t">
+          <p class="text-xs text-gray-500">
+            分析时间：${formatDate(analysis.created_at)}
+          </p>
+        </div>
+      </div>
+    `;
+  };
+  
+  // 渲染分页控件
+  const renderPagination = (totalPages: number) => {
+    if (totalPages <= 1) {
+      pagination.classList.add('hidden');
+      return;
+    }
+    
+    pagination.classList.remove('hidden');
+    pagination.innerHTML = '';
+    
+    // 上一页按钮
+    const prevBtn = document.createElement('button');
+    prevBtn.textContent = '上一页';
+    prevBtn.className = 'px-4 py-2 rounded-md text-sm font-medium transition-colors';
+    prevBtn.disabled = currentPage === 1;
+    
+    if (currentPage === 1) {
+      prevBtn.className += ' bg-gray-100 text-gray-400 cursor-not-allowed';
+    } else {
+      prevBtn.className += ' bg-white text-gray-700 hover:bg-gray-50 border border-gray-300';
+      prevBtn.onclick = () => loadFavorites(currentPage - 1);
+    }
+    
+    pagination.appendChild(prevBtn);
+    
+    // 页码按钮
+    for (let i = 1; i <= totalPages; i++) {
+      if (
+        i === 1 || 
+        i === totalPages || 
+        (i >= currentPage - 2 && i <= currentPage + 2)
+      ) {
+        const pageBtn = document.createElement('button');
+        pageBtn.textContent = i.toString();
+        pageBtn.className = 'px-3 py-2 rounded-md text-sm font-medium transition-colors';
+        
+        if (i === currentPage) {
+          pageBtn.className += ' bg-blue-600 text-white';
+        } else {
+          pageBtn.className += ' bg-white text-gray-700 hover:bg-gray-50 border border-gray-300';
+          pageBtn.onclick = () => loadFavorites(i);
+        }
+        
+        pagination.appendChild(pageBtn);
+      } else if (
+        (i === currentPage - 3 && i > 1) || 
+        (i === currentPage + 3 && i < totalPages)
+      ) {
+        const dots = document.createElement('span');
+        dots.textContent = '...';
+        dots.className = 'px-2 py-2 text-gray-500';
+        pagination.appendChild(dots);
+      }
+    }
+    
+    // 下一页按钮
+    const nextBtn = document.createElement('button');
+    nextBtn.textContent = '下一页';
+    nextBtn.className = 'px-4 py-2 rounded-md text-sm font-medium transition-colors';
+    nextBtn.disabled = currentPage === totalPages;
+    
+    if (currentPage === totalPages) {
+      nextBtn.className += ' bg-gray-100 text-gray-400 cursor-not-allowed';
+    } else {
+      nextBtn.className += ' bg-white text-gray-700 hover:bg-gray-50 border border-gray-300';
+      nextBtn.onclick = () => loadFavorites(currentPage + 1);
+    }
+    
+    pagination.appendChild(nextBtn);
+  };
+  
+  // 加载收藏列表
+  const loadFavorites = async (page = 1) => {
+    log('加载收藏列表', { page });
+    currentPage = page;
+    
+    try {
+      const response = await fetch(`/api/favorites?page=${page}&limit=${limit}`);
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || '加载失败');
+      }
+      
+      log('收藏列表加载成功', data);
+      
+      if (data.favorites.length === 0 && page === 1) {
+        favoritesList.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        pagination.classList.add('hidden');
+      } else {
+        favoritesList.classList.remove('hidden');
+        emptyState.classList.add('hidden');
+        
+        favoritesList.innerHTML = data.favorites
+          .map((favorite: any) => renderFavoriteItem(favorite))
+          .join('');
+        
+        renderPagination(data.pagination.totalPages);
+      }
+    } catch (error) {
+      log('加载收藏列表失败', error);
+      favoritesList.innerHTML = `
+        <div class="text-center py-8">
+          <p class="text-red-600">加载失败，请刷新重试</p>
+        </div>
+      `;
+    }
+  };
+  
+  // 删除收藏
+  const deleteFavorite = async (favoriteId: string) => {
+    if (!confirm('确定要删除这个收藏吗？')) {
+      return;
+    }
+    
+    log('删除收藏', { favoriteId });
+    
+    try {
+      const response = await fetch(`/api/favorites?id=${favoriteId}`, {
+        method: 'DELETE',
+      });
+      
+      if (response.ok) {
+        log('删除成功');
+        
+        // 从DOM中移除
+        const item = document.querySelector(`[data-favorite-id="${favoriteId}"]`);
+        if (item) {
+          item.remove();
+        }
+        
+        // 如果当前页没有内容了，加载上一页
+        if (favoritesList.children.length === 0 && currentPage > 1) {
+          loadFavorites(currentPage - 1);
+        } else if (favoritesList.children.length === 0) {
+          favoritesList.classList.add('hidden');
+          emptyState.classList.remove('hidden');
+          pagination.classList.add('hidden');
+        }
+      } else {
+        const data = await response.json();
+        alert(data.error || '删除失败');
+      }
+    } catch (error) {
+      log('删除失败', error);
+      alert('网络错误，请稍后重试');
+    }
+  };
+  
+  // 事件监听
+  favoritesList.addEventListener('click', (e) => {
+    if ((e.target as HTMLElement).classList.contains('delete-btn')) {
+      const btn = e.target as HTMLButtonElement;
+      const favoriteId = btn.dataset.id;
+      if (favoriteId) {
+        deleteFavorite(favoriteId);
+      }
+    }
+  });
+  
+  // 初始加载
+  loadFavorites();
+</script>

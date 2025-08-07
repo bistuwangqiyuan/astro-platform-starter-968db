@@ -1,0 +1,18 @@
+---
+import Navigation from './Navigation.astro';
+import Logo from '../Logo.astro';
+---
+
+<header class="bg-white shadow-sm border-b border-gray-200">
+  <div class="container mx-auto px-4">
+    <div class="flex items-center justify-between h-16">
+      <div class="flex items-center">
+        <a href="/" class="flex items-center">
+          <Logo class="h-8 w-8 mr-3" />
+          <span class="text-xl font-semibold">Astro Platform</span>
+        </a>
+      </div>
+      <Navigation />
+    </div>
+  </div>
+</header>

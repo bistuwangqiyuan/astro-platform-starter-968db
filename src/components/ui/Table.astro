@@ -1,0 +1,40 @@
+---
+export interface Props {
+  headers: string[];
+  rows: any[][];
+  class?: string;
+}
+
+const { headers, rows, class: className } = Astro.props;
+
+const baseStyles = 'min-w-full divide-y divide-gray-200';
+const tableClasses = `${baseStyles} ${className || ''}`.trim();
+---
+
+<div class="overflow-x-auto">
+  <table class={tableClasses}>
+    <thead class="bg-gray-50">
+      <tr>
+        {headers.map((header) => (
+          <th
+            scope="col"
+            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+          >
+            {header}
+          </th>
+        ))}
+      </tr>
+    </thead>
+    <tbody class="bg-white divide-y divide-gray-200">
+      {rows.map((row, index) => (
+        <tr class={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+          {row.map((cell) => (
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              {cell}
+            </td>
+          ))}
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>

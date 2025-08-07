@@ -1,0 +1,443 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/ui/Button.astro';
+import { getCurrentUser } from '../utils/auth';
+
+// 确保用户已登录（中间件会处理重定向）
+const user = await getCurrentUser();
+---
+
+<BaseLayout title="文本分析">
+  <div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-8">文本分析</h1>
+    
+    <!-- 分析模式切换 -->
+    <div class="mb-6">
+      <div class="flex space-x-4">
+        <button 
+          id="singleModeBtn" 
+          class="px-4 py-2 rounded-md font-medium transition-colors bg-blue-600 text-white"
+        >
+          单个分析
+        </button>
+        <button 
+          id="batchModeBtn" 
+          class="px-4 py-2 rounded-md font-medium transition-colors bg-gray-200 text-gray-700 hover:bg-gray-300"
+        >
+          批量分析
+        </button>
+      </div>
+    </div>
+
+    <!-- 单个分析模式 -->
+    <div id="singleMode" class="space-y-6">
+      <div>
+        <label for="singleContent" class="block text-sm font-medium mb-2">
+          输入要分析的文本
+        </label>
+        <textarea
+          id="singleContent"
+          rows="10"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="在此输入或粘贴您要分析的文本..."
+        ></textarea>
+        <p class="text-sm text-gray-500 mt-1">最多支持50,000个字符</p>
+      </div>
+      
+      <Button id="analyzeBtn" variant="primary" class="w-full">
+        开始分析
+      </Button>
+    </div>
+
+    <!-- 批量分析模式 -->
+    <div id="batchMode" class="space-y-6 hidden">
+      <div>
+        <div class="flex justify-between items-center mb-2">
+          <label class="block text-sm font-medium">
+            批量输入文本（最多10个）
+          </label>
+          <Button id="addTextBtn" variant="secondary" size="sm">
+            添加文本
+          </Button>
+        </div>
+        
+        <div id="batchTexts" class="space-y-4">
+          <div class="batch-text-item">
+            <div class="flex items-start space-x-2">
+              <span class="text-sm font-medium text-gray-500 mt-2">1.</span>
+              <textarea
+                rows="4"
+                class="batch-content flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="输入第1个文本..."
+              ></textarea>
+              <button class="remove-text-btn text-red-600 hover:text-red-800 mt-2 hidden">
+                删除
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <p class="text-sm text-gray-500">每个文本最多支持10,000个字符</p>
+      </div>
+      
+      <Button id="batchAnalyzeBtn" variant="primary" class="w-full">
+        批量分析
+      </Button>
+    </div>
+
+    <!-- 分析结果 -->
+    <div id="results" class="mt-8 hidden">
+      <h2 class="text-2xl font-bold mb-4">分析结果</h2>
+      <div id="resultsContent" class="space-y-6"></div>
+    </div>
+
+    <!-- 加载状态 -->
+    <div id="loading" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+      <div class="bg-white rounded-lg p-6 max-w-sm w-full">
+        <div class="flex items-center space-x-4">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <p class="text-lg">正在分析中...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  // 日志函数
+  const log = (message: string, data?: any) => {
+    console.log(`[Analyze] ${message}`, data || '');
+  };
+
+  // DOM 元素
+  const singleModeBtn = document.getElementById('singleModeBtn') as HTMLButtonElement;
+  const batchModeBtn = document.getElementById('batchModeBtn') as HTMLButtonElement;
+  const singleMode = document.getElementById('singleMode') as HTMLDivElement;
+  const batchMode = document.getElementById('batchMode') as HTMLDivElement;
+  const singleContent = document.getElementById('singleContent') as HTMLTextAreaElement;
+  const analyzeBtn = document.getElementById('analyzeBtn') as HTMLButtonElement;
+  const batchAnalyzeBtn = document.getElementById('batchAnalyzeBtn') as HTMLButtonElement;
+  const addTextBtn = document.getElementById('addTextBtn') as HTMLButtonElement;
+  const batchTexts = document.getElementById('batchTexts') as HTMLDivElement;
+  const results = document.getElementById('results') as HTMLDivElement;
+  const resultsContent = document.getElementById('resultsContent') as HTMLDivElement;
+  const loading = document.getElementById('loading') as HTMLDivElement;
+
+  let currentMode = 'single';
+  let batchTextCount = 1;
+
+  // 模式切换
+  singleModeBtn.addEventListener('click', () => {
+    log('切换到单个分析模式');
+    currentMode = 'single';
+    singleModeBtn.classList.add('bg-blue-600', 'text-white');
+    singleModeBtn.classList.remove('bg-gray-200', 'text-gray-700');
+    batchModeBtn.classList.add('bg-gray-200', 'text-gray-700');
+    batchModeBtn.classList.remove('bg-blue-600', 'text-white');
+    singleMode.classList.remove('hidden');
+    batchMode.classList.add('hidden');
+  });
+
+  batchModeBtn.addEventListener('click', () => {
+    log('切换到批量分析模式');
+    currentMode = 'batch';
+    batchModeBtn.classList.add('bg-blue-600', 'text-white');
+    batchModeBtn.classList.remove('bg-gray-200', 'text-gray-700');
+    singleModeBtn.classList.add('bg-gray-200', 'text-gray-700');
+    singleModeBtn.classList.remove('bg-blue-600', 'text-white');
+    batchMode.classList.remove('hidden');
+    singleMode.classList.add('hidden');
+  });
+
+  // 添加批量文本
+  addTextBtn.addEventListener('click', () => {
+    if (batchTextCount >= 10) {
+      alert('最多只能添加10个文本');
+      return;
+    }
+    
+    batchTextCount++;
+    log('添加批量文本', { count: batchTextCount });
+    
+    const newItem = document.createElement('div');
+    newItem.className = 'batch-text-item';
+    newItem.innerHTML = `
+      <div class="flex items-start space-x-2">
+        <span class="text-sm font-medium text-gray-500 mt-2">${batchTextCount}.</span>
+        <textarea
+          rows="4"
+          class="batch-content flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="输入第${batchTextCount}个文本..."
+        ></textarea>
+        <button class="remove-text-btn text-red-600 hover:text-red-800 mt-2">
+          删除
+        </button>
+      </div>
+    `;
+    
+    batchTexts.appendChild(newItem);
+    updateRemoveButtons();
+  });
+
+  // 更新删除按钮的显示
+  const updateRemoveButtons = () => {
+    const items = batchTexts.querySelectorAll('.batch-text-item');
+    items.forEach((item, index) => {
+      const removeBtn = item.querySelector('.remove-text-btn') as HTMLButtonElement;
+      if (items.length > 1) {
+        removeBtn.classList.remove('hidden');
+      } else {
+        removeBtn.classList.add('hidden');
+      }
+    });
+  };
+
+  // 删除批量文本
+  batchTexts.addEventListener('click', (e) => {
+    if ((e.target as HTMLElement).classList.contains('remove-text-btn')) {
+      const item = (e.target as HTMLElement).closest('.batch-text-item');
+      if (item) {
+        item.remove();
+        batchTextCount--;
+        log('删除批量文本', { count: batchTextCount });
+        
+        // 重新编号
+        const items = batchTexts.querySelectorAll('.batch-text-item');
+        items.forEach((item, index) => {
+          const span = item.querySelector('span') as HTMLSpanElement;
+          span.textContent = `${index + 1}.`;
+        });
+        
+        updateRemoveButtons();
+      }
+    }
+  });
+
+  // 显示分析结果
+  const displayResults = (data: any) => {
+    log('显示分析结果', data);
+    results.classList.remove('hidden');
+    
+    if (currentMode === 'single') {
+      // 单个分析结果
+      resultsContent.innerHTML = `
+        <div class="bg-white rounded-lg shadow p-6">
+          <h3 class="text-lg font-semibold mb-4">分析摘要</h3>
+          <p class="text-gray-700 mb-4">${data.result.summary}</p>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h4 class="font-medium mb-2">统计信息</h4>
+              <ul class="space-y-1 text-sm">
+                <li>字数：${data.result.statistics.words}</li>
+                <li>字符数：${data.result.statistics.characters}</li>
+                <li>句子数：${data.result.statistics.sentences}</li>
+                <li>段落数：${data.result.statistics.paragraphs}</li>
+                <li>平均句长：${data.result.statistics.averageSentenceLength.toFixed(1)} 词/句</li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 class="font-medium mb-2">分析结果</h4>
+              <ul class="space-y-1 text-sm">
+                <li>情感倾向：<span class="font-medium">${data.result.sentiment}</span></li>
+                <li>可读性：<span class="font-medium">${data.result.readability}</span></li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="mt-4">
+            <h4 class="font-medium mb-2">关键词</h4>
+            <div class="flex flex-wrap gap-2">
+              ${data.result.keywords.map((keyword: string) => 
+                `<span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">${keyword}</span>`
+              ).join('')}
+            </div>
+          </div>
+          
+          ${data.id ? `
+            <div class="mt-4 pt-4 border-t">
+              <button class="favorite-btn text-blue-600 hover:text-blue-800" data-id="${data.id}">
+                收藏此分析
+              </button>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    } else {
+      // 批量分析结果
+      resultsContent.innerHTML = `
+        <div class="bg-white rounded-lg shadow p-6 mb-4">
+          <h3 class="text-lg font-semibold mb-2">批量分析摘要</h3>
+          <p class="text-gray-700">
+            共分析 ${data.summary.total} 个文本，
+            成功 ${data.summary.success} 个，
+            失败 ${data.summary.failed} 个
+          </p>
+        </div>
+        
+        ${data.results.map((result: any, index: number) => {
+          if (result.success) {
+            return `
+              <div class="bg-white rounded-lg shadow p-6 mb-4">
+                <h3 class="text-lg font-semibold mb-4">文本 ${index + 1} 分析结果</h3>
+                <p class="text-gray-700 mb-4">${result.result.summary}</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div class="text-sm">
+                    <p>字数：${result.result.statistics.words}</p>
+                    <p>情感：${result.result.sentiment}</p>
+                    <p>可读性：${result.result.readability}</p>
+                  </div>
+                  <div>
+                    <p class="text-sm font-medium mb-1">关键词：</p>
+                    <div class="flex flex-wrap gap-1">
+                      ${result.result.keywords.map((keyword: string) => 
+                        `<span class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">${keyword}</span>`
+                      ).join('')}
+                    </div>
+                  </div>
+                </div>
+                
+                ${result.id ? `
+                  <div class="mt-4 pt-4 border-t">
+                    <button class="favorite-btn text-blue-600 hover:text-blue-800 text-sm" data-id="${result.id}">
+                      收藏
+                    </button>
+                  </div>
+                ` : ''}
+              </div>
+            `;
+          } else {
+            return `
+              <div class="bg-red-50 rounded-lg p-6 mb-4">
+                <h3 class="text-lg font-semibold mb-2 text-red-800">文本 ${index + 1} 分析失败</h3>
+                <p class="text-red-600">${result.error || '分析过程中出现错误'}</p>
+              </div>
+            `;
+          }
+        }).join('')}
+      `;
+    }
+    
+    // 滚动到结果
+    results.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // 单个分析
+  analyzeBtn.addEventListener('click', async () => {
+    const content = singleContent.value.trim();
+    
+    if (!content) {
+      alert('请输入要分析的文本');
+      return;
+    }
+    
+    log('开始单个分析', { length: content.length });
+    
+    loading.classList.remove('hidden');
+    
+    try {
+      const response = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ content }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        log('分析成功', data);
+        displayResults(data);
+      } else {
+        log('分析失败', data);
+        alert(data.error || '分析失败，请重试');
+      }
+    } catch (error) {
+      log('分析出错', error);
+      alert('网络错误，请稍后重试');
+    } finally {
+      loading.classList.add('hidden');
+    }
+  });
+
+  // 批量分析
+  batchAnalyzeBtn.addEventListener('click', async () => {
+    const contentElements = batchTexts.querySelectorAll('.batch-content') as NodeListOf<HTMLTextAreaElement>;
+    const contents = Array.from(contentElements)
+      .map(el => el.value.trim())
+      .filter(content => content.length > 0);
+    
+    if (contents.length === 0) {
+      alert('请至少输入一个文本');
+      return;
+    }
+    
+    log('开始批量分析', { count: contents.length });
+    
+    loading.classList.remove('hidden');
+    
+    try {
+      const response = await fetch('/api/analyze/batch', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ contents }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        log('批量分析成功', data);
+        displayResults(data);
+      } else {
+        log('批量分析失败', data);
+        alert(data.error || '批量分析失败，请重试');
+      }
+    } catch (error) {
+      log('批量分析出错', error);
+      alert('网络错误，请稍后重试');
+    } finally {
+      loading.classList.add('hidden');
+    }
+  });
+
+  // 收藏功能
+  resultsContent.addEventListener('click', async (e) => {
+    if ((e.target as HTMLElement).classList.contains('favorite-btn')) {
+      const btn = e.target as HTMLButtonElement;
+      const analysisId = btn.dataset.id;
+      
+      if (!analysisId) return;
+      
+      log('收藏分析', { analysisId });
+      
+      try {
+        const response = await fetch('/api/favorites', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ analysisId }),
+        });
+        
+        if (response.ok) {
+          log('收藏成功');
+          btn.textContent = '已收藏';
+          btn.disabled = true;
+          btn.classList.add('text-gray-500');
+          btn.classList.remove('text-blue-600', 'hover:text-blue-800');
+        } else {
+          const data = await response.json();
+          alert(data.error || '收藏失败');
+        }
+      } catch (error) {
+        log('收藏出错', error);
+        alert('网络错误，请稍后重试');
+      }
+    }
+  });
+</script>

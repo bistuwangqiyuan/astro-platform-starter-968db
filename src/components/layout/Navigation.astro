@@ -1,0 +1,78 @@
+---
+import Button from '../ui/Button.astro';
+
+// 获取当前用户状态
+import { getCurrentUser } from '../../utils/auth';
+const user = await getCurrentUser();
+
+// 获取当前路径
+const pathname = Astro.url.pathname;
+
+// 导航链接样式
+const linkClass = (path: string) => {
+  const base = "px-3 py-2 text-sm font-medium rounded-md transition-colors";
+  const active = pathname === path || pathname.startsWith(path + '/');
+  return active 
+    ? `${base} text-blue-600 bg-blue-50` 
+    : `${base} text-gray-700 hover:text-gray-900 hover:bg-gray-50`;
+};
+---
+
+<nav class="flex items-center space-x-4">
+  {user ? (
+    <>
+      <a href="/analyze" class={linkClass('/analyze')}>分析</a>
+      <a href="/favorites" class={linkClass('/favorites')}>收藏</a>
+      <a href="/history" class={linkClass('/history')}>历史</a>
+      <a href="/profile" class={linkClass('/profile')}>个人资料</a>
+      <Button 
+        variant="ghost" 
+        size="sm"
+        id="logoutButton"
+        class="ml-2"
+      >
+        登出
+      </Button>
+    </>
+  ) : (
+    <>
+      <a href="/auth/login" class={linkClass('/auth/login')}>登录</a>
+      <Button href="/auth/register" variant="primary" size="sm">
+        注册
+      </Button>
+    </>
+  )}
+</nav>
+
+{user && (
+  <script>
+    // 登出功能
+    const logoutButton = document.getElementById('logoutButton');
+    if (logoutButton) {
+      logoutButton.addEventListener('click', async () => {
+        console.log('[Navigation] 开始登出');
+        
+        try {
+          const response = await fetch('/api/auth/logout', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+          
+          if (response.ok) {
+            console.log('[Navigation] 登出成功');
+            // 跳转到首页
+            window.location.href = '/';
+          } else {
+            console.error('[Navigation] 登出失败');
+            alert('登出失败，请重试');
+          }
+        } catch (error) {
+          console.error('[Navigation] 登出出错', error);
+          alert('网络错误，请稍后重试');
+        }
+      });
+    }
+  </script>
+)}

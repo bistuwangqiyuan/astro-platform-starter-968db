@@ -1,0 +1,94 @@
+---
+export interface Props {
+  id: string;
+  title?: string;
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  class?: string;
+}
+
+const { id, title, size = 'md', class: className } = Astro.props;
+
+const sizeClasses = {
+  sm: 'max-w-md',
+  md: 'max-w-lg',
+  lg: 'max-w-2xl',
+  xl: 'max-w-4xl',
+};
+---
+
+<div
+  id={id}
+  class="fixed inset-0 z-50 overflow-y-auto hidden"
+  aria-labelledby={`${id}-title`}
+  aria-modal="true"
+>
+  <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+    <!-- Background overlay -->
+    <div class="modal-overlay fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+
+    <!-- This element is to trick the browser into centering the modal contents. -->
+    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+    <!-- Modal panel -->
+    <div class={`modal-content inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle ${sizeClasses[size]} sm:w-full ${className || ''}`}>
+      {title && (
+        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+          <h3 class="text-lg leading-6 font-medium text-gray-900" id={`${id}-title`}>
+            {title}
+          </h3>
+        </div>
+      )}
+      
+      <div class="modal-body bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+        <slot />
+      </div>
+      
+      <div class="modal-footer bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+        <slot name="footer" />
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Modal控制函数
+  window.openModal = (modalId: string) => {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      modal.classList.remove('hidden');
+      document.body.classList.add('overflow-hidden');
+    }
+  };
+  
+  window.closeModal = (modalId: string) => {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      modal.classList.add('hidden');
+      document.body.classList.remove('overflow-hidden');
+    }
+  };
+  
+  // 点击背景关闭
+  document.addEventListener('click', (e) => {
+    if ((e.target as HTMLElement).classList.contains('modal-overlay')) {
+      const modal = (e.target as HTMLElement).closest('.fixed');
+      if (modal) {
+        modal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+      }
+    }
+  });
+  
+  // ESC键关闭
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const openModals = document.querySelectorAll('.fixed.z-50:not(.hidden)');
+      openModals.forEach(modal => {
+        modal.classList.add('hidden');
+      });
+      if (openModals.length > 0) {
+        document.body.classList.remove('overflow-hidden');
+      }
+    }
+  });
+</script>

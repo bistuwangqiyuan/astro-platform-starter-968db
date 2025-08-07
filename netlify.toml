@@ -1,0 +1,25 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+# 环境变量示例（实际值在Netlify控制台设置）
+# SUPABASE_URL = "your_supabase_url"
+# SUPABASE_ANON_KEY = "your_supabase_anon_key"
+# SUPABASE_SERVICE_ROLE_KEY = "your_supabase_service_role_key"
+# PUBLIC_SITE_URL = "https://your-site.netlify.app"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"

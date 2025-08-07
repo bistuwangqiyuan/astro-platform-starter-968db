@@ -1,21 +1,122 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import ContextAlert from '../components/ContextAlert.astro';
-import Markdown from '../components/Markdown.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/ui/Button.astro';
+import { getCurrentUser } from '../utils/auth';
 
-const explainer = `
-An Astro website can go way beyond static pages - on the right platform.
-
-Netlify supports not only [Streaming SSR](https://docs.astro.build/en/guides/server-side-rendering/#html-streaming) and fast [Edge Middleware](https://docs.astro.build/en/guides/middleware/), but also [on-demand revalidation](https://www.netlify.com/blog/cache-tags-and-purge-api-on-netlify/) and [stale-while-revalidate](https://www.netlify.com/blog/swr-and-fine-grained-cache-control/). 
-Any page or data can be rebuilt only when needed, without site visitors ever getting a performance hit.
-`;
+const user = await getCurrentUser();
 ---
 
-<Layout title="Welcome to Astro.">
-    <ContextAlert class="mb-8" />
-    <h1 class="mb-10">Netlify Platform Starter for Astro</h1>
-    <Markdown content={explainer} class="mb-10 text-lg" />
-    <p>
-        <a href="https://docs.netlify.com/frameworks/astro/" class="btn btn-lg sm:min-w-64">Read the Docs</a>
-    </p>
-</Layout>
+<BaseLayout title="首页">
+  <div class="container mx-auto px-4 py-12">
+    <!-- Hero Section -->
+    <div class="text-center mb-16">
+      <h1 class="text-5xl font-bold text-gray-900 mb-6">
+        智能文本分析平台
+      </h1>
+      <p class="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+        使用先进的自然语言处理技术，快速分析您的文本内容，
+        获取关键洞察，提升内容质量。
+      </p>
+      
+      {user ? (
+        <Button href="/analyze" variant="primary" size="lg">
+          开始分析
+        </Button>
+      ) : (
+        <div class="space-x-4">
+          <Button href="/auth/register" variant="primary" size="lg">
+            免费注册
+          </Button>
+          <Button href="/auth/login" variant="secondary" size="lg">
+            立即登录
+          </Button>
+        </div>
+      )}
+    </div>
+
+    <!-- Features Section -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+      <div class="bg-white rounded-lg shadow p-6 text-center">
+        <div class="w-16 h-16 bg-blue-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+          <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold mb-2">智能分析</h3>
+        <p class="text-gray-600">
+          自动提取关键词、情感分析、可读性评估等多维度分析
+        </p>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6 text-center">
+        <div class="w-16 h-16 bg-yellow-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+          <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold mb-2">收藏管理</h3>
+        <p class="text-gray-600">
+          保存重要分析结果，随时查看和管理您的收藏内容
+        </p>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6 text-center">
+        <div class="w-16 h-16 bg-green-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+          <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold mb-2">历史记录</h3>
+        <p class="text-gray-600">
+          完整的操作历史记录，追踪您的所有分析活动
+        </p>
+      </div>
+    </div>
+
+    <!-- How it Works Section -->
+    <div class="bg-gray-50 rounded-lg p-8 mb-16">
+      <h2 class="text-3xl font-bold text-center mb-8">如何使用</h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="text-center">
+          <div class="text-4xl font-bold text-blue-600 mb-2">1</div>
+          <h4 class="font-semibold mb-1">注册账户</h4>
+          <p class="text-sm text-gray-600">创建免费账户，开始使用</p>
+        </div>
+        
+        <div class="text-center">
+          <div class="text-4xl font-bold text-blue-600 mb-2">2</div>
+          <h4 class="font-semibold mb-1">输入文本</h4>
+          <p class="text-sm text-gray-600">粘贴或输入要分析的内容</p>
+        </div>
+        
+        <div class="text-center">
+          <div class="text-4xl font-bold text-blue-600 mb-2">3</div>
+          <h4 class="font-semibold mb-1">获取分析</h4>
+          <p class="text-sm text-gray-600">实时获取详细分析结果</p>
+        </div>
+        
+        <div class="text-center">
+          <div class="text-4xl font-bold text-blue-600 mb-2">4</div>
+          <h4 class="font-semibold mb-1">保存收藏</h4>
+          <p class="text-sm text-gray-600">收藏重要分析以便查看</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA Section -->
+    {!user && (
+      <div class="text-center bg-blue-600 text-white rounded-lg p-12">
+        <h2 class="text-3xl font-bold mb-4">
+          准备好开始了吗？
+        </h2>
+        <p class="text-xl mb-8">
+          立即注册，免费体验智能文本分析
+        </p>
+        <Button href="/auth/register" variant="secondary" size="lg">
+          免费注册
+        </Button>
+      </div>
+    )}
+  </div>
+</BaseLayout>
