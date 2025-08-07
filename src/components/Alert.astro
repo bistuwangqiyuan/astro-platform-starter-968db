@@ -10,21 +10,12 @@ interface Props {
     class?: string;
 }
 
-const { 
-    type = 'info',
-    variant = 'default',
-    size = 'md',
-    dismissible = false,
-    autoClose = false,
-    duration = 5000,
-    icon = true,
-    class: className
-} = Astro.props;
+const { type = 'info', variant = 'default', size = 'md', dismissible = false, autoClose = false, duration = 5000, icon = true, class: className } = Astro.props;
 
 // 根据类型获取对应的样式类
 const getTypeClasses = (type: string, variant: string) => {
     const baseClasses = 'rounded-lg border';
-    
+
     const typeStyles = {
         success: {
             default: 'bg-green-50 border-green-200 text-green-800',
@@ -52,8 +43,8 @@ const getTypeClasses = (type: string, variant: string) => {
             outlined: 'bg-transparent border-primary text-primary'
         }
     };
-    
-    return `${baseClasses} ${typeStyles[type as keyof typeof typeStyles][variant]}`;
+
+    return `${baseClasses} ${typeStyles[type as keyof typeof typeStyles][variant as keyof (typeof typeStyles)[keyof typeof typeStyles]]}`;
 };
 
 // 根据尺寸获取对应的样式类
@@ -63,7 +54,7 @@ const getSizeClasses = (size: string) => {
         md: 'p-4 text-base',
         lg: 'p-5 text-lg'
     };
-    
+
     return sizeStyles[size as keyof typeof sizeStyles];
 };
 
@@ -76,7 +67,7 @@ const getIcon = (type: string) => {
         info: `<path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>`,
         primary: `<path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>`
     };
-    
+
     return icons[type as keyof typeof icons];
 };
 
@@ -86,60 +77,44 @@ const finalClasses = [
     getSizeClasses(size),
     dismissible ? 'pr-10 relative' : '',
     className
-].filter(Boolean).join(' ');
+]
+    .filter(Boolean)
+    .join(' ');
 ---
 
-<<<<<<< Current (Your changes)
-<div class:list={['flex gap-4 p-4 rounded-sm bg-primary text-primary-content', className]}>
-    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 fill-current shrink-0" viewBox="0 0 24 24">
-        <path
-            d="M12 20.016q3.281 0 5.648-2.367t2.367-5.648-2.367-5.648-5.648-2.367-5.648 2.367-2.367 5.648 2.367 5.648 5.648 2.367zM12 2.016q4.125 0 7.055 2.93t2.93 7.055-2.93 7.055-7.055 2.93-7.055-2.93-2.93-7.055 2.93-7.055 7.055-2.93zM11.016 6.984h1.969v6h-1.969v-6zM11.016 15h1.969v2.016h-1.969v-2.016z"
-        ></path>
-    </svg>
-    <slot />
-</div>
-=======
-<div 
-    class={finalClasses}
-    data-alert-type={type}
-    data-dismissible={dismissible}
-    data-auto-close={autoClose}
-    data-duration={duration}
->
-    {icon && (
-        <div class="flex-shrink-0">
-            <svg 
-                class="w-5 h-5 mt-0.5" 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-            >
-                <Fragment set:html={getIcon(type)} />
-            </svg>
-        </div>
-    )}
-    
+<div class={finalClasses} data-alert-type={type} data-dismissible={dismissible} data-auto-close={autoClose} data-duration={duration}>
+    {
+        icon && (
+            <div class="flex-shrink-0">
+                <svg class="w-5 h-5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <Fragment set:html={getIcon(type)} />
+                </svg>
+            </div>
+        )
+    }
+
     <div class="flex-1 min-w-0">
         <slot />
     </div>
-    
-    {dismissible && (
-        <button 
-            type="button"
-            class={`
+
+    {
+        dismissible && (
+            <button
+                type="button"
+                class={`
                 absolute top-2 right-2 p-1 rounded-md transition-opacity duration-200
                 hover:opacity-70 focus:outline-none focus:ring-2 focus:ring-offset-2
                 ${variant === 'filled' ? 'focus:ring-white/50' : 'focus:ring-current/50'}
             `}
-            aria-label="关闭提醒"
-            data-dismiss-alert
-        >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-        </button>
-    )}
+                aria-label="关闭提醒"
+                data-dismiss-alert
+            >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        )
+    }
 </div>
 
 <script>
@@ -148,7 +123,7 @@ const finalClasses = [
         constructor() {
             this.init();
         }
-        
+
         init() {
             // 处理可关闭的Alert
             document.addEventListener('click', (e) => {
@@ -157,21 +132,21 @@ const finalClasses = [
                     this.dismissAlert(dismissButton.closest('[data-alert-type]'));
                 }
             });
-            
+
             // 处理自动关闭的Alert
             this.handleAutoClose();
         }
-        
+
         dismissAlert(alertElement: Element | null) {
             if (!alertElement) return;
-            
+
             // 添加淡出动画
             alertElement.classList.add('opacity-0', 'transform', 'scale-95');
-            
+
             // 动画完成后移除元素
             setTimeout(() => {
                 alertElement.remove();
-                
+
                 // 触发自定义事件
                 const event = new CustomEvent('alert:dismissed', {
                     detail: {
@@ -182,19 +157,19 @@ const finalClasses = [
                 document.dispatchEvent(event);
             }, 300);
         }
-        
+
         handleAutoClose() {
             const autoCloseAlerts = document.querySelectorAll('[data-auto-close="true"]');
-            
-            autoCloseAlerts.forEach(alert => {
+
+            autoCloseAlerts.forEach((alert) => {
                 const duration = parseInt(alert.getAttribute('data-duration') || '5000');
-                
+
                 setTimeout(() => {
                     this.dismissAlert(alert);
                 }, duration);
             });
         }
-        
+
         // 动态创建Alert的方法
         static create(options: {
             type?: string;
@@ -205,31 +180,23 @@ const finalClasses = [
             duration?: number;
             container?: string | Element;
         }) {
-            const {
-                type = 'info',
-                message,
-                variant = 'default',
-                dismissible = true,
-                autoClose = true,
-                duration = 5000,
-                container = document.body
-            } = options;
-            
+            const { type = 'info', message, variant = 'default', dismissible = true, autoClose = true, duration = 5000, container = document.body } = options;
+
             // 创建Alert元素
             const alertElement = document.createElement('div');
             alertElement.setAttribute('data-alert-type', type);
             alertElement.setAttribute('data-dismissible', dismissible.toString());
             alertElement.setAttribute('data-auto-close', autoClose.toString());
             alertElement.setAttribute('data-duration', duration.toString());
-            
+
             // 设置样式类
             const typeClasses = this.getTypeClasses(type, variant);
             const baseClasses = 'flex items-start gap-3 p-4 rounded-lg transition-all duration-300';
             alertElement.className = `${baseClasses} ${typeClasses} ${dismissible ? 'pr-10 relative' : ''}`;
-            
+
             // 创建内容
             let innerHTML = '';
-            
+
             // 添加图标
             const icon = this.getIcon(type);
             innerHTML += `
@@ -239,10 +206,10 @@ const finalClasses = [
                     </svg>
                 </div>
             `;
-            
+
             // 添加消息内容
             innerHTML += `<div class="flex-1 min-w-0">${message}</div>`;
-            
+
             // 添加关闭按钮
             if (dismissible) {
                 innerHTML += `
@@ -258,21 +225,20 @@ const finalClasses = [
                     </button>
                 `;
             }
-            
+
             alertElement.innerHTML = innerHTML;
-            
+
             // 添加到容器
-            const targetContainer = typeof container === 'string' ? 
-                document.querySelector(container) : container;
-            
+            const targetContainer = typeof container === 'string' ? document.querySelector(container) : container;
+
             if (targetContainer) {
                 targetContainer.appendChild(alertElement);
-                
+
                 // 触发动画
                 requestAnimationFrame(() => {
                     alertElement.classList.add('animate-in');
                 });
-                
+
                 // 处理自动关闭
                 if (autoClose) {
                     setTimeout(() => {
@@ -280,10 +246,10 @@ const finalClasses = [
                     }, duration);
                 }
             }
-            
+
             return alertElement;
         }
-        
+
         static getTypeClasses(type: string, variant: string) {
             const typeStyles = {
                 success: {
@@ -312,11 +278,10 @@ const finalClasses = [
                     outlined: 'bg-transparent border-primary text-primary border'
                 }
             } as const;
-            
-            return typeStyles[type as keyof typeof typeStyles]?.[variant as keyof typeof typeStyles.success] || 
-                   typeStyles.info.default;
+
+            return typeStyles[type as keyof typeof typeStyles]?.[variant as keyof typeof typeStyles.success] || typeStyles.info.default;
         }
-        
+
         static getIcon(type: string) {
             const icons = {
                 success: `<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>`,
@@ -325,23 +290,23 @@ const finalClasses = [
                 info: `<path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>`,
                 primary: `<path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>`
             };
-            
+
             return icons[type as keyof typeof icons] || icons.info;
         }
     }
-    
+
     // 初始化Alert管理器
     document.addEventListener('DOMContentLoaded', () => {
         new AlertManager();
     });
-    
+
     // 如果页面已经加载完成，立即初始化
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => new AlertManager());
     } else {
         new AlertManager();
     }
-    
+
     // 导出到全局作用域，便于在其他地方使用
     (window as any).AlertManager = AlertManager;
 </script>
@@ -352,11 +317,11 @@ const finalClasses = [
         transform: translateY(0);
         opacity: 1;
     }
-    
+
     [data-alert-type].animate-in {
         animation: slideInDown 0.3s ease-out;
     }
-    
+
     @keyframes slideInDown {
         from {
             transform: translateY(-100%);
@@ -367,7 +332,7 @@ const finalClasses = [
             opacity: 1;
         }
     }
-    
+
     /* 响应式调整 */
     @media (max-width: 640px) {
         [data-alert-type] {
@@ -375,21 +340,21 @@ const finalClasses = [
             border-radius: 0.5rem;
         }
     }
-    
+
     /* 深色模式支持 */
     @media (prefers-color-scheme: dark) {
         [data-alert-type] {
             filter: brightness(0.9);
         }
     }
-    
+
     /* 高对比度模式支持 */
     @media (prefers-contrast: high) {
         [data-alert-type] {
             border-width: 2px;
         }
     }
-    
+
     /* 减少动画偏好 */
     @media (prefers-reduced-motion: reduce) {
         [data-alert-type],
@@ -400,4 +365,3 @@ const finalClasses = [
         }
     }
 </style>
->>>>>>> Incoming (Background Agent changes)
