@@ -211,3 +211,84 @@ export const realtime = {
         return supabase.removeChannel(subscription);
     }
 };
+
+// 趋势分析API
+export class TrendsAPI {
+    // 记录分析
+    async recordAnalysis(data: {
+        type: string;
+        provider: string;
+        textLength: number;
+    }) {
+        try {
+            const { data: user } = await supabase.auth.getUser();
+            const userId = user?.user?.id;
+            
+            const { error } = await supabase
+                .from('analysis_trends')
+                .insert({
+                    user_id: userId,
+                    analysis_type: data.type,
+                    provider: data.provider,
+                    text_length: data.textLength,
+                    created_at: new Date().toISOString()
+                });
+                
+            if (error) {
+                console.error('[TrendsAPI] 记录分析失败:', error);
+            }
+        } catch (error) {
+            console.error('[TrendsAPI] 记录分析错误:', error);
+        }
+    }
+    
+    // 获取趋势数据
+    async getTrends(userId?: string, days = 30) {
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - days);
+        
+        let query = supabase
+            .from('analysis_trends')
+            .select('*')
+            .gte('created_at', startDate.toISOString())
+            .order('created_at', { ascending: false });
+            
+        if (userId) {
+            query = query.eq('user_id', userId);
+        }
+        
+        const { data, error } = await query;
+        return { data, error };
+    }
+    
+    // 获取统计数据
+    async getStatistics(userId?: string) {
+        let query = supabase.from('analysis_trends').select('analysis_type, provider');
+        
+        if (userId) {
+            query = query.eq('user_id', userId);
+        }
+        
+        const { data, error } = await query;
+        
+        if (error || !data) {
+            return { data: null, error };
+        }
+        
+        // 计算统计
+        const stats = {
+            totalAnalyses: data.length,
+            byType: {} as Record<string, number>,
+            byProvider: {} as Record<string, number>
+        };
+        
+        data.forEach((item) => {
+            // 按类型统计
+            stats.byType[item.analysis_type] = (stats.byType[item.analysis_type] || 0) + 1;
+            // 按提供商统计
+            stats.byProvider[item.provider] = (stats.byProvider[item.provider] || 0) + 1;
+        });
+        
+        return { data: stats, error: null };
+    }
+}
