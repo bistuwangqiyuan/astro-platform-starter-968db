@@ -4,7 +4,7 @@ import react from '@astrojs/react';
 
 // https://astro.build/config
 export default defineConfig({
-    output: 'static',
+    output: 'server',
     adapter: netlify(),
     integrations: [react()],
     // 设置为你的实际域名，或者留空使用 Netlify 默认域名
